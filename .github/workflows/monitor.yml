@@ -1,0 +1,46 @@
+name: Production Monitoring
+
+on:
+  #  schedule:
+  #    - cron: '*/15 * * * *'
+  workflow_dispatch:
+
+jobs:
+  health-check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check API Health
+        id: health
+        run: |
+          response=$(curl -s -o /dev/null -w "%{http_code}" ${{ secrets.PRODUCTION_URL }}/health)
+          echo "status_code=$response" >> $GITHUB_OUTPUT
+          if [ "$response" != "200" ]; then
+            echo "❌ API Health Check Failed: $response"
+            exit 1
+          fi
+          echo "✅ API Health Check Passed"
+
+      - name: Test Random Endpoint
+        run: |
+          curl -f ${{ secrets.PRODUCTION_URL }}/api/jokes/random || exit 1
+          echo "✅ Random endpoint working"
+
+      - name: Send email on failure
+        if: failure()
+        uses: dawidd6/action-send-mail@v5
+        with:
+          server_address: sandbox.smtp.mailtrap.io
+          server_port: 465
+          username: 9a04faf7a140ac
+          password: aaa89780e67f54
+          subject: "🚨 Fallo en monitor API de Chiquito"
+          body: |
+            El endpoint de health o el endpoint de chistes ha fallado en el entorno de producción.
+
+            👉 Ver detalles del pipeline:
+            ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+
+            Revisa el despliegue o la conectividad del sistema.
+          to: tu-correo@ejemplo.com
+          from: "Monitor API <tu-correo@ejemplo.com>"
+          secure: false

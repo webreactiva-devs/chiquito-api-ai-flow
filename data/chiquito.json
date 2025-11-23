@@ -1,0 +1,106 @@
+{
+  "jokes": [
+    {
+      "id": 1,
+      "type": "phrase",
+      "content": "¡Hasta luego, Lucas!",
+      "category": "clásico"
+    },
+    {
+      "id": 2,
+      "type": "phrase",
+      "content": "¡Te das cuen!",
+      "category": "clásico"
+    },
+    {
+      "id": 3,
+      "type": "phrase",
+      "content": "¡Cobarde, pecador!",
+      "category": "clásico"
+    },
+    {
+      "id": 4,
+      "type": "phrase",
+      "content": "¡Al ataquer!",
+      "category": "clásico"
+    },
+    {
+      "id": 5,
+      "type": "phrase",
+      "content": "¡Fistro duodenal!",
+      "category": "clásico"
+    },
+    {
+      "id": 6,
+      "type": "phrase",
+      "content": "¡Jarl!",
+      "category": "clásico"
+    },
+    {
+      "id": 7,
+      "type": "phrase",
+      "content": "¡No puedor!",
+      "category": "clásico"
+    },
+    {
+      "id": 8,
+      "type": "phrase",
+      "content": "¡Grijandemore!",
+      "category": "clásico"
+    },
+    {
+      "id": 9,
+      "type": "phrase",
+      "content": "¡A can de mor!",
+      "category": "clásico"
+    },
+    {
+      "id": 10,
+      "type": "phrase",
+      "content": "¡Eres un fistro de bambino!",
+      "category": "clásico"
+    },
+    {
+      "id": 11,
+      "type": "joke",
+      "content": "Están las cosas muy mal, estamos friendo los huevos con saliva.",
+      "category": "crisis"
+    },
+    {
+      "id": 12,
+      "type": "joke",
+      "content": "Paso más hambre que el sastre de Tarzán.",
+      "category": "comparaciones"
+    },
+    {
+      "id": 13,
+      "type": "joke",
+      "content": "Tengo más nervios que un filete de cinco pesetas.",
+      "category": "comparaciones"
+    },
+    {
+      "id": 14,
+      "type": "joke",
+      "content": "¡Socorro, no sé nadar! Me estoy ahogando, estoy húmedo.",
+      "category": "absurdo"
+    },
+    {
+      "id": 15,
+      "type": "joke",
+      "content": "¡Mamarr, mamarr! Ha venido papá borracho y se ha caído en el water. ¡Quítale la cartera y tira de la cisterna!",
+      "category": "familia"
+    },
+    {
+      "id": 16,
+      "type": "joke",
+      "content": "Le dice un padre a un niño: 'Dime una mentira, hijo.' ¡¡¡Paparr, paparr, paparr!!!",
+      "category": "familia"
+    },
+    {
+      "id": 17,
+      "type": "joke",
+      "content": "¡Feliz año nuevo a todos, señores! ¿Cómo que feliz año nuevo a todos si estamos en agosto? Uy, qué bronca me va a echar mi mujer, nunca me he retrasado tanto...",
+      "category": "absurdo"
+    }
+  ]
+}
