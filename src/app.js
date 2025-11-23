@@ -1,8 +1,8 @@
-import express from "express";
+import { readFileSync } from "node:fs";
+import { dirname, join } from "node:path";
+import { fileURLToPath } from "node:url";
 import cors from "cors";
-import { readFileSync } from "fs";
-import { fileURLToPath } from "url";
-import { dirname, join } from "path";
+import express from "express";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -15,62 +15,62 @@ const dataPath = join(__dirname, "../data/chiquito.json");
 const { jokes } = JSON.parse(readFileSync(dataPath, "utf8"));
 
 const buildCategoriesWithCount = (jokesData) => {
-  const categoryCount = {};
+	const categoryCount = {};
 
-  jokesData.forEach((joke) => {
-    categoryCount[joke.category] = (categoryCount[joke.category] || 0) + 1;
-  });
+	jokesData.forEach((joke) => {
+		categoryCount[joke.category] = (categoryCount[joke.category] || 0) + 1;
+	});
 
-  return Object.entries(categoryCount).map(([name, count]) => ({
-    name,
-    count,
-  }));
+	return Object.entries(categoryCount).map(([name, count]) => ({
+		name,
+		count,
+	}));
 };
 
-app.get("/api/categories", (req, res) => {
-  try {
-    const categories = buildCategoriesWithCount(jokes);
-    res.json(categories);
-  } catch (error) {
-    res
-      .status(500)
-      .json({ error: "Server error retrieving categories, fistro" });
-  }
+app.get("/api/categories", (_req, res) => {
+	try {
+		const categories = buildCategoriesWithCount(jokes);
+		res.json(categories);
+	} catch (_error) {
+		res
+			.status(500)
+			.json({ error: "Server error retrieving categories, fistro" });
+	}
 });
 
-app.get("/health", (req, res) => {
-  res.json({
-    status: "OK",
-    message: "Fistro pecador de la pradera",
-    timestamp: new Date().toISOString(),
-  });
+app.get("/health", (_req, res) => {
+	res.json({
+		status: "OK",
+		message: "Fistro pecador de la pradera",
+		timestamp: new Date().toISOString(),
+	});
 });
 
 app.get("/api/jokes", (req, res) => {
-  const { category } = req.query;
+	const { category } = req.query;
 
-  if (category) {
-    const filteredJokes = jokes.filter((j) => j.category === category);
-    return res.json(filteredJokes);
-  }
+	if (category) {
+		const filteredJokes = jokes.filter((j) => j.category === category);
+		return res.json(filteredJokes);
+	}
 
-  res.json(jokes);
+	res.json(jokes);
 });
 
-app.get("/api/jokes/random", (req, res) => {
-  const randomJoke = jokes[Math.floor(Math.random() * jokes.length)];
-  res.json(randomJoke);
+app.get("/api/jokes/random", (_req, res) => {
+	const randomJoke = jokes[Math.floor(Math.random() * jokes.length)];
+	res.json(randomJoke);
 });
 
 app.get("/api/jokes/:id", (req, res) => {
-  const id = parseInt(req.params.id);
-  const joke = jokes.find((j) => j.id === id);
+	const id = parseInt(req.params.id, 10);
+	const joke = jokes.find((j) => j.id === id);
 
-  if (!joke) {
-    return res.status(404).json({ error: "Joke not found, fistro" });
-  }
+	if (!joke) {
+		return res.status(404).json({ error: "Joke not found, fistro" });
+	}
 
-  res.json(joke);
+	res.json(joke);
 });
 
 export default app;
