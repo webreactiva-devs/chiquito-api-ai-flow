@@ -1,20 +1,32 @@
 openapi: 3.0.4
 info:
-  title: Chiquito Flow API
+  title: Chiquito API
   description: API to get phrases and jokes from the legendary Chiquito de la Calzada
-  version: 1.0.0
+  version: 2.0.0
   contact:
-    name: Chiquito Flow API
+    name: Chiquito API
   license:
     name: MIT
 
 servers:
   - url: http://localhost:3000
     description: Development server
-  - url: https://api-chiquito-flow.com
-    description: Production server
 
 paths:
+  /health:
+    get:
+      summary: Health check
+      description: Returns the API health status
+      tags:
+        - Health
+      responses:
+        '200':
+          description: API is healthy
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Health'
+
   /api/jokes:
     get:
       summary: Get all jokes
@@ -38,30 +50,11 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/Joke'
-              examples:
-                all_jokes:
-                  summary: All jokes
-                  value:
-                    - id: 1
-                      type: "phrase"
-                      content: "¡Hasta luego, Lucas!"
-                      category: "clásico"
-                    - id: 2
-                      type: "phrase"
-                      content: "¡Te das cuen!"
-                      category: "clásico"
-                filtered_by_category:
-                  summary: Jokes filtered by category
-                  value:
-                    - id: 1
-                      type: "phrase"
-                      content: "¡Hasta luego, Lucas!"
-                      category: "clásico"
 
   /api/jokes/random:
     get:
       summary: Get a random joke
-      description: Returns a randomly selected joke from the entire collection
+      description: Returns a randomly selected joke from the entire collection. Increments view count.
       tags:
         - Jokes
       responses:
@@ -70,17 +63,12 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Joke'
-              example:
-                id: 5
-                type: "phrase"
-                content: "¡Fistro duodenal!"
-                category: "clásico"
+                $ref: '#/components/schemas/JokeWithStats'
 
   /api/jokes/{id}:
     get:
       summary: Get a joke by ID
-      description: Returns a specific joke based on its unique ID
+      description: Returns a specific joke based on its unique ID. Increments view count.
       tags:
         - Jokes
       parameters:
@@ -98,20 +86,83 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Joke'
-              example:
-                id: 1
-                type: "phrase"
-                content: "¡Hasta luego, Lucas!"
-                category: "clásico"
+                $ref: '#/components/schemas/JokeWithStats'
         '404':
           description: Joke not found
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
-              example:
-                error: "Joke not found, fistro"
+
+  /api/jokes/{id}/vote:
+    post:
+      summary: Vote on a joke
+      description: Register an upvote or downvote for a specific joke
+      tags:
+        - Votes
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Unique identifier of the joke
+          schema:
+            type: integer
+            minimum: 1
+            example: 1
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/VoteRequest'
+      responses:
+        '200':
+          description: Vote registered successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VoteResponse'
+        '400':
+          description: Invalid vote type
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Joke not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /api/jokes/{id}/votes:
+    get:
+      summary: Get vote counts for a joke
+      description: Returns the upvote and downvote counts for a specific joke
+      tags:
+        - Votes
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Unique identifier of the joke
+          schema:
+            type: integer
+            minimum: 1
+            example: 1
+      responses:
+        '200':
+          description: Vote counts retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VoteResponse'
+        '404':
+          description: Joke not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
 
   /api/categories:
     get:
@@ -128,20 +179,80 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/Category'
-              example:
-                - name: "clásico"
-                  count: 10
         '500':
           description: Server error retrieving categories
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
-              example:
-                error: "Server error retrieving categories, fistro"
+
+  /api/stats:
+    get:
+      summary: Get global statistics
+      description: Returns global statistics including total jokes, votes, and views
+      tags:
+        - Statistics
+      responses:
+        '200':
+          description: Statistics retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GlobalStats'
+
+  /api/stats/top:
+    get:
+      summary: Get top ranked jokes
+      description: Returns jokes ranked by views or votes
+      tags:
+        - Statistics
+      parameters:
+        - name: by
+          in: query
+          description: Ranking criteria
+          required: false
+          schema:
+            type: string
+            enum: [views, votes]
+            default: views
+        - name: limit
+          in: query
+          description: Maximum number of results
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 10
+      responses:
+        '200':
+          description: Top jokes retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/JokeWithStats'
 
 components:
   schemas:
+    Health:
+      type: object
+      required:
+        - status
+        - message
+        - timestamp
+      properties:
+        status:
+          type: string
+          example: "OK"
+        message:
+          type: string
+          example: "Fistro pecador de la pradera"
+        timestamp:
+          type: string
+          format: date-time
+
     Joke:
       type: object
       required:
@@ -167,11 +278,53 @@ components:
           type: string
           description: Category to which the joke belongs
           example: "clásico"
-      example:
-        id: 1
-        type: "phrase"
-        content: "¡Hasta luego, Lucas!"
-        category: "clásico"
+
+    JokeWithStats:
+      allOf:
+        - $ref: '#/components/schemas/Joke'
+        - type: object
+          properties:
+            views:
+              type: integer
+              description: Number of times this joke has been viewed
+              example: 42
+            score:
+              type: integer
+              description: Vote score (upvotes - downvotes)
+              example: 5
+            votes:
+              $ref: '#/components/schemas/VoteResponse'
+
+    VoteRequest:
+      type: object
+      required:
+        - type
+      properties:
+        type:
+          type: string
+          enum: [up, down]
+          description: Type of vote
+          example: "up"
+
+    VoteResponse:
+      type: object
+      required:
+        - upvotes
+        - downvotes
+        - score
+      properties:
+        upvotes:
+          type: integer
+          description: Number of upvotes
+          example: 10
+        downvotes:
+          type: integer
+          description: Number of downvotes
+          example: 2
+        score:
+          type: integer
+          description: Net score (upvotes - downvotes)
+          example: 8
 
     Category:
       type: object
@@ -188,9 +341,26 @@ components:
           description: Number of jokes in this category
           minimum: 0
           example: 10
-      example:
-        name: "clásico"
-        count: 10
+
+    GlobalStats:
+      type: object
+      required:
+        - totalJokes
+        - totalVotes
+        - totalViews
+      properties:
+        totalJokes:
+          type: integer
+          description: Total number of jokes in the database
+          example: 17
+        totalVotes:
+          type: integer
+          description: Total number of votes cast
+          example: 150
+        totalViews:
+          type: integer
+          description: Total number of joke views
+          example: 1000
 
     Error:
       type: object
@@ -203,7 +373,13 @@ components:
           example: "Joke not found, fistro"
 
 tags:
+  - name: Health
+    description: API health check
   - name: Jokes
-    description: Operations related to managing and retrieving jokes from Chiquito de la Calzada
+    description: Operations related to managing and retrieving jokes
+  - name: Votes
+    description: Operations related to voting on jokes
   - name: Categories
-    description: Operations related to joke categories and their metadata
+    description: Operations related to joke categories
+  - name: Statistics
+    description: Operations related to usage statistics and rankings

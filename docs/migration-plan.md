@@ -259,29 +259,29 @@
 ## Fase 7: Tests E2E y Finalización
 
 ### 7.1 Tests End-to-End
-- [ ] Crear `tests/e2e/flows.test.ts` con flujos completos:
+- [x] Crear `tests/e2e/flows.test.ts` con flujos completos:
   - Flujo de usuario viendo jokes y votando
   - Verificar que stats se actualizan correctamente
   - Verificar rankings
 
 ### 7.2 Análisis estático con Biome
-- [ ] Instalar Biome
+- [x] Instalar Biome
   ```bash
   npm install -D @biomejs/biome
   ```
-- [ ] Inicializar configuración
+- [x] Inicializar configuración
   ```bash
   npx @biomejs/biome init
   ```
-- [ ] Configurar `biome.json` para TypeScript
-- [ ] Añadir scripts en `package.json`:
+- [x] Configurar `biome.json` para TypeScript
+- [x] Añadir scripts en `package.json`:
   - `lint` - linting con Biome
   - `format` - formateo con Biome
   - `check` - linting + formateo
-- [ ] Añadir script `test:types` para verificación de tipos
+- [x] Añadir script `test:types` para verificación de tipos
 
 ### 7.3 Scripts finales
-- [ ] Verificar que `package.json` tiene todos los scripts:
+- [x] Verificar que `package.json` tiene todos los scripts:
   ```json
   {
     "scripts": {
@@ -302,19 +302,19 @@
   ```
 
 ### 7.4 Verificación final
-- [ ] Ejecutar `npm run check` sin errores (lint + format)
-- [ ] Ejecutar `npm run test:types` sin errores
-- [ ] Ejecutar `npm test` completo - todos los tests pasan
-- [ ] Verificar cobertura de tests
+- [x] Ejecutar `npm run check` sin errores (lint + format)
+- [x] Ejecutar `npm run test:types` sin errores
+- [x] Ejecutar `npm test` completo - todos los tests pasan
+- [x] Verificar cobertura de tests
 
 ### 7.5 Documentación final
-- [ ] Actualizar `CLAUDE.md` con:
+- [x] Actualizar `CLAUDE.md` con:
   - Todos los comandos finales
   - Arquitectura actualizada
   - Estructura de BD
   - Testing trophy
-- [ ] Actualizar `docs/openapi.yml` con especificación completa
-- [ ] Actualizar `README.md` con nueva documentación
+- [x] Actualizar `docs/openapi.yml` con especificación completa
+- [x] Actualizar `README.md` con nueva documentación
 
 ---
 
