@@ -96,3 +96,8 @@ temp/
 .Trashes
 ehthumbs.db
 Thumbs.db
+
+# SQLite database
+data/*.db
+data/*.db-wal
+data/*.db-shm

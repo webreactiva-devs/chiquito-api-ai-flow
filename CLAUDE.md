@@ -8,6 +8,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 npm run dev              # Start development server with auto-reload (tsx watch)
 npm start                # Start production server (tsx)
 npm run build            # Compile TypeScript to JavaScript
+npm run db:init          # Initialize/reset SQLite database
 npm test                 # Run all tests (Vitest)
 npm run test:unit        # Run unit tests only
 npm run test:integration # Run integration tests only
@@ -26,13 +27,20 @@ npx vitest run -t "should return all jokes"
 
 This is a REST API serving Chiquito de la Calzada jokes using TypeScript and Fastify with ES modules.
 
-**Data flow**: JSON file (`data/chiquito.json`) → loaded at startup in `src/app.ts` → served via Fastify routes
+**Data flow**: SQLite database (`data/chiquito.db`) → queried via `src/db/queries.ts` → served via Fastify routes
 
 **Key files**:
 - `src/app.ts` - Fastify app with all routes and business logic (exports app for testing)
 - `src/server.ts` - Server initialization only
 - `src/types/index.ts` - TypeScript interfaces (Joke, Category, etc.)
-- `data/chiquito.json` - Jokes database with `id`, `type`, `content`, `category` fields
+- `src/db/connection.ts` - Database connection singleton
+- `src/db/schema.ts` - Table definitions
+- `src/db/queries.ts` - Typed query functions
+- `src/db/init.ts` - Database initialization script
+- `data/chiquito.json` - Seed data for database initialization
+
+**Database tables**:
+- `jokes` - id (INTEGER PRIMARY KEY), type (TEXT), content (TEXT), category (TEXT)
 
 ## Code Style Requirements
 
@@ -44,7 +52,7 @@ This is a REST API serving Chiquito de la Calzada jokes using TypeScript and Fas
 
 ## Testing
 
-Uses Vitest with Supertest for HTTP testing. Testing trophy structure:
+Uses Vitest with Fastify's inject() for HTTP testing. Testing trophy structure:
 - `tests/unit/` - Unit tests for isolated functions
 - `tests/integration/` - Integration tests for API endpoints
 - `tests/e2e/` - End-to-end tests for complete user flows

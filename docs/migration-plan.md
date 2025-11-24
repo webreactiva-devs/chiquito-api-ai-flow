@@ -112,15 +112,15 @@
 ## Fase 4: Migración a SQLite
 
 ### 4.1 Instalación de dependencias
-- [ ] Instalar better-sqlite3
+- [x] Instalar better-sqlite3
   ```bash
   npm install better-sqlite3
   npm install -D @types/better-sqlite3
   ```
 
 ### 4.2 Estructura de base de datos
-- [ ] Crear `src/db/connection.ts` - singleton de conexión
-- [ ] Crear `src/db/schema.ts` - definición de tablas:
+- [x] Crear `src/db/connection.ts` - singleton de conexión
+- [x] Crear `src/db/schema.ts` - definición de tablas:
   ```sql
   CREATE TABLE jokes (
     id INTEGER PRIMARY KEY,
@@ -129,32 +129,32 @@
     category TEXT NOT NULL
   );
   ```
-- [ ] Crear `src/db/init.ts` - script de inicialización y seed
-- [ ] Crear `src/db/queries.ts` - funciones de consulta tipadas
+- [x] Crear `src/db/init.ts` - script de inicialización y seed
+- [x] Crear `src/db/queries.ts` - funciones de consulta tipadas
 
 ### 4.3 Script de inicialización
-- [ ] Añadir script `db:init` en `package.json`
-- [ ] Migrar datos de `data/chiquito.json` a SQLite
-- [ ] Añadir `data/chiquito.db` a `.gitignore`
+- [x] Añadir script `db:init` en `package.json`
+- [x] Migrar datos de `data/chiquito.json` a SQLite
+- [x] Añadir `data/chiquito.db` a `.gitignore`
 
 ### 4.4 Migración de rutas
-- [ ] Actualizar `src/app.ts` para usar queries SQL
-- [ ] Eliminar lectura de JSON file
+- [x] Actualizar `src/app.ts` para usar queries SQL
+- [x] Eliminar lectura de JSON file
 
 ### 4.5 Tests unitarios de BD
-- [ ] Crear `tests/unit/db.test.ts` con tests de queries
-- [ ] Usar BD en memoria para tests: `:memory:`
+- [x] Crear `tests/unit/db.test.ts` con tests de queries
+- [x] Usar BD en memoria para tests: `:memory:`
 
 ### 4.6 Verificación
-- [ ] Ejecutar `npm run db:init` y verificar creación de BD
-- [ ] Ejecutar `npm run test:unit` y verificar tests de BD
-- [ ] Ejecutar `npm run test:integration` y verificar todos los tests
-- [ ] Ejecutar `npm test` completo
-- [ ] Probar manualmente todos los endpoints
+- [x] Ejecutar `npm run db:init` y verificar creación de BD
+- [x] Ejecutar `npm run test:unit` y verificar tests de BD
+- [x] Ejecutar `npm run test:integration` y verificar todos los tests
+- [x] Ejecutar `npm test` completo
+- [x] Probar manualmente todos los endpoints
 
 ### 4.7 Documentación
-- [ ] Actualizar `CLAUDE.md` con comandos de BD
-- [ ] Documentar estructura de tablas
+- [x] Actualizar `CLAUDE.md` con comandos de BD
+- [x] Documentar estructura de tablas
 
 ---
 
