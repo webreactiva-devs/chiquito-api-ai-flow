@@ -1,5 +1,5 @@
 import type Database from "better-sqlite3";
-import type { Category, Joke } from "../types/index.js";
+import type { Category, Joke, VoteResult, VoteType } from "../types/index.js";
 
 export const getAllJokes = (db: Database.Database): Joke[] => {
   return db.prepare("SELECT id, type, content, category FROM jokes").all() as Joke[];
@@ -42,4 +42,24 @@ export const insertJokes = (db: Database.Database, jokes: Joke[]): void => {
     }
   });
   insertMany(jokes);
+};
+
+export const addVote = (db: Database.Database, jokeId: number, voteType: VoteType): void => {
+  db.prepare("INSERT INTO votes (joke_id, vote_type) VALUES (?, ?)").run(jokeId, voteType);
+};
+
+export const getVotesByJokeId = (db: Database.Database, jokeId: number): VoteResult => {
+  const result = db.prepare(`
+    SELECT
+      COALESCE(SUM(CASE WHEN vote_type = 'up' THEN 1 ELSE 0 END), 0) as upvotes,
+      COALESCE(SUM(CASE WHEN vote_type = 'down' THEN 1 ELSE 0 END), 0) as downvotes
+    FROM votes
+    WHERE joke_id = ?
+  `).get(jokeId) as { upvotes: number; downvotes: number };
+
+  return {
+    upvotes: result.upvotes,
+    downvotes: result.downvotes,
+    score: result.upvotes - result.downvotes,
+  };
 };

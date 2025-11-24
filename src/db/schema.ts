@@ -8,9 +8,20 @@ export const createTables = (db: Database.Database): void => {
       content TEXT NOT NULL,
       category TEXT NOT NULL
     );
+
+    CREATE TABLE IF NOT EXISTS votes (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      joke_id INTEGER NOT NULL,
+      vote_type TEXT CHECK(vote_type IN ('up', 'down')) NOT NULL,
+      created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+      FOREIGN KEY (joke_id) REFERENCES jokes(id)
+    );
   `);
 };
 
 export const dropTables = (db: Database.Database): void => {
-  db.exec(`DROP TABLE IF EXISTS jokes;`);
+  db.exec(`
+    DROP TABLE IF EXISTS votes;
+    DROP TABLE IF EXISTS jokes;
+  `);
 };

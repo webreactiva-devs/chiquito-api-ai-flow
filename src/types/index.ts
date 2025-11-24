@@ -5,6 +5,12 @@ export interface Joke {
   category: string;
 }
 
+export interface JokeWithVotes extends Joke {
+  upvotes: number;
+  downvotes: number;
+  score: number;
+}
+
 export interface Category {
   name: string;
   count: number;
@@ -19,3 +25,11 @@ export interface HealthResponse {
 export interface ErrorResponse {
   error: string;
 }
+
+export interface VoteResult {
+  upvotes: number;
+  downvotes: number;
+  score: number;
+}
+
+export type VoteType = "up" | "down";

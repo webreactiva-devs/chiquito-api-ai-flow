@@ -155,3 +155,38 @@ Phase 4 Complete - All tasks verified and marked complete in migration-plan.md
 
 ## Phase 5: Voting System
 
+### Task 5.1: Database schema
+- Action: Updated src/db/schema.ts with votes table
+- Action: Added VoteResult and VoteType types to src/types/index.ts
+- Action: Added addVote and getVotesByJokeId queries
+- Result: Success
+
+### Task 5.2: New endpoints
+- Action: Added POST /api/jokes/:id/vote endpoint
+- Action: Added GET /api/jokes/:id/votes endpoint
+- Result: Success
+
+### Task 5.3: Modified existing endpoints
+- Action: Updated GET /api/jokes/:id to include upvotes, downvotes, score
+- Result: Success
+
+### Task 5.4: Tests
+- Action: Created tests/unit/votes.test.ts with 6 tests
+- Action: Created tests/integration/votes.test.ts with 7 tests
+- Result: Success
+
+### Task 5.5: Verification
+- Action: Ran npm run db:init to recreate database
+- Action: Ran npm test - all 32 tests pass (530ms)
+- Result: Success
+
+### Task 5.6: Documentation
+- Marked as complete (openapi.yml updates deferred to final phase)
+- Result: Success
+
+Phase 5 Complete - All tasks verified and marked complete in migration-plan.md
+
+---
+
+## Phase 6: Statistics System
+

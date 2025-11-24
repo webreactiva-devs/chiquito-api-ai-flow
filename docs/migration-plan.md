@@ -161,7 +161,7 @@
 ## Fase 5: Sistema de Votaciones
 
 ### 5.1 Esquema de base de datos
-- [ ] Añadir tabla `votes` en `src/db/schema.ts`:
+- [x] Añadir tabla `votes` en `src/db/schema.ts`:
   ```sql
   CREATE TABLE votes (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -171,37 +171,37 @@
     FOREIGN KEY (joke_id) REFERENCES jokes(id)
   );
   ```
-- [ ] Añadir queries de votación en `src/db/queries.ts`
+- [x] Añadir queries de votación en `src/db/queries.ts`
 
 ### 5.2 Nuevos endpoints
-- [ ] `POST /api/jokes/:id/vote` - registrar voto
+- [x] `POST /api/jokes/:id/vote` - registrar voto
   - Body: `{ "type": "up" | "down" }`
   - Response: `{ "upvotes": number, "downvotes": number, "score": number }`
-- [ ] `GET /api/jokes/:id/votes` - obtener conteo de votos
+- [x] `GET /api/jokes/:id/votes` - obtener conteo de votos
 
 ### 5.3 Modificar respuestas existentes
-- [ ] Añadir campo `score` en respuestas de jokes individuales
-- [ ] Añadir campo `votes` en `GET /api/jokes/:id`
+- [x] Añadir campo `score` en respuestas de jokes individuales
+- [x] Añadir campo `votes` en `GET /api/jokes/:id`
 
 ### 5.4 Tests
-- [ ] Crear `tests/unit/votes.test.ts` - tests de queries de votos
-- [ ] Crear `tests/integration/votes.test.ts` - tests de endpoints
-- [ ] Actualizar `tests/integration/jokes.test.ts` con nuevos campos
+- [x] Crear `tests/unit/votes.test.ts` - tests de queries de votos
+- [x] Crear `tests/integration/votes.test.ts` - tests de endpoints
+- [x] Actualizar `tests/integration/jokes.test.ts` con nuevos campos
 
 ### 5.5 Verificación
-- [ ] Ejecutar `npm run db:init` para recrear BD con nueva tabla
-- [ ] Ejecutar `npm run test:unit`
-- [ ] Ejecutar `npm run test:integration`
-- [ ] Ejecutar `npm test` completo
-- [ ] Probar manualmente:
+- [x] Ejecutar `npm run db:init` para recrear BD con nueva tabla
+- [x] Ejecutar `npm run test:unit`
+- [x] Ejecutar `npm run test:integration`
+- [x] Ejecutar `npm test` completo
+- [x] Probar manualmente:
   ```bash
   curl -X POST http://localhost:3000/api/jokes/1/vote -H "Content-Type: application/json" -d '{"type":"up"}'
   curl http://localhost:3000/api/jokes/1/votes
   ```
 
 ### 5.6 Documentación
-- [ ] Actualizar `docs/openapi.yml` con nuevos endpoints de votación
-- [ ] Actualizar `CLAUDE.md` con información del sistema de votos
+- [x] Actualizar `docs/openapi.yml` con nuevos endpoints de votación
+- [x] Actualizar `CLAUDE.md` con información del sistema de votos
 
 ---
 
