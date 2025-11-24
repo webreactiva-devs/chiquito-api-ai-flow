@@ -24,12 +24,12 @@ npx vitest run -t "should return all jokes"
 
 ## Architecture
 
-This is a REST API serving Chiquito de la Calzada jokes using TypeScript and Express.js with ES modules.
+This is a REST API serving Chiquito de la Calzada jokes using TypeScript and Fastify with ES modules.
 
-**Data flow**: JSON file (`data/chiquito.json`) → loaded at startup in `src/app.ts` → served via Express routes
+**Data flow**: JSON file (`data/chiquito.json`) → loaded at startup in `src/app.ts` → served via Fastify routes
 
 **Key files**:
-- `src/app.ts` - Express app with all routes and business logic (exports app for testing)
+- `src/app.ts` - Fastify app with all routes and business logic (exports app for testing)
 - `src/server.ts` - Server initialization only
 - `src/types/index.ts` - TypeScript interfaces (Joke, Category, etc.)
 - `data/chiquito.json` - Jokes database with `id`, `type`, `content`, `category` fields

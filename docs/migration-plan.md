@@ -70,7 +70,7 @@
 ## Fase 3: Migración a Fastify
 
 ### 3.1 Instalación de dependencias
-- [ ] Instalar Fastify y plugins
+- [x] Instalar Fastify y plugins
   ```bash
   npm install fastify @fastify/cors
   npm uninstall express
@@ -78,24 +78,24 @@
   ```
 
 ### 3.2 Reescritura del servidor
-- [ ] Reescribir `src/app.ts` con Fastify:
+- [x] Reescribir `src/app.ts` con Fastify:
   - Configurar CORS
   - Definir schemas JSON para validación
   - Migrar todas las rutas existentes
-- [ ] Actualizar `src/server.ts` para inicialización Fastify
+- [x] Actualizar `src/server.ts` para inicialización Fastify
 
 ### 3.3 Actualización de tests
-- [ ] Actualizar `tests/integration/jokes.test.ts` para Fastify
+- [x] Actualizar `tests/integration/jokes.test.ts` para Fastify
   - Usar `app.inject()` en lugar de Supertest
-- [ ] Eliminar dependencia de Supertest
+- [x] Eliminar dependencia de Supertest
   ```bash
   npm uninstall supertest
   ```
 
 ### 3.4 Verificación
-- [ ] Ejecutar `npm run dev` y verificar servidor
-- [ ] Ejecutar `npm run test:integration` y verificar todos los tests
-- [ ] Probar manualmente todos los endpoints:
+- [x] Ejecutar `npm run dev` y verificar servidor
+- [x] Ejecutar `npm run test:integration` y verificar todos los tests
+- [x] Probar manualmente todos los endpoints:
   - `GET /health`
   - `GET /api/jokes`
   - `GET /api/jokes?category=clásico`
@@ -104,8 +104,8 @@
   - `GET /api/categories`
 
 ### 3.5 Documentación
-- [ ] Actualizar `CLAUDE.md` con cambios de Fastify
-- [ ] Actualizar `docs/openapi.yml` con schemas de validación
+- [x] Actualizar `CLAUDE.md` con cambios de Fastify
+- [x] Actualizar `docs/openapi.yml` con schemas de validación
 
 ---
 

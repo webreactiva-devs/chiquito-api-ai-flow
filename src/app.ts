@@ -1,77 +1,75 @@
 import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
-import cors from "cors";
-import express, { type Request, type Response } from "express";
+import cors from "@fastify/cors";
+import Fastify from "fastify";
 import type { Category, Joke } from "./types/index.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
-const app = express();
-app.use(cors());
-app.use(express.json());
+const app = Fastify({ logger: false });
+
+await app.register(cors);
 
 const dataPath = join(__dirname, "../data/chiquito.json");
 const { jokes }: { jokes: Joke[] } = JSON.parse(readFileSync(dataPath, "utf8"));
 
 const buildCategoriesWithCount = (jokesData: Joke[]): Category[] => {
-	const categoryCount: Record<string, number> = {};
+  const categoryCount: Record<string, number> = {};
 
-	jokesData.forEach((joke) => {
-		categoryCount[joke.category] = (categoryCount[joke.category] || 0) + 1;
-	});
+  jokesData.forEach((joke) => {
+    categoryCount[joke.category] = (categoryCount[joke.category] || 0) + 1;
+  });
 
-	return Object.entries(categoryCount).map(([name, count]) => ({
-		name,
-		count,
-	}));
+  return Object.entries(categoryCount).map(([name, count]) => ({
+    name,
+    count,
+  }));
 };
 
-app.get("/api/categories", (_req: Request, res: Response) => {
-	try {
-		const categories = buildCategoriesWithCount(jokes);
-		res.json(categories);
-	} catch (_error) {
-		res
-			.status(500)
-			.json({ error: "Server error retrieving categories, fistro" });
-	}
+app.get("/api/categories", async () => {
+  try {
+    const categories = buildCategoriesWithCount(jokes);
+    return categories;
+  } catch (_error) {
+    throw { statusCode: 500, message: "Server error retrieving categories, fistro" };
+  }
 });
 
-app.get("/health", (_req: Request, res: Response) => {
-	res.json({
-		status: "OK",
-		message: "Fistro pecador de la pradera",
-		timestamp: new Date().toISOString(),
-	});
+app.get("/health", async () => {
+  return {
+    status: "OK",
+    message: "Fistro pecador de la pradera",
+    timestamp: new Date().toISOString(),
+  };
 });
 
-app.get("/api/jokes", (req: Request, res: Response) => {
-	const { category } = req.query;
+app.get<{ Querystring: { category?: string } }>("/api/jokes", async (request) => {
+  const { category } = request.query;
 
-	if (category) {
-		const filteredJokes = jokes.filter((j) => j.category === category);
-		return res.json(filteredJokes);
-	}
+  if (category) {
+    const filteredJokes = jokes.filter((j) => j.category === category);
+    return filteredJokes;
+  }
 
-	res.json(jokes);
+  return jokes;
 });
 
-app.get("/api/jokes/random", (_req: Request, res: Response) => {
-	const randomJoke = jokes[Math.floor(Math.random() * jokes.length)];
-	res.json(randomJoke);
+app.get("/api/jokes/random", async () => {
+  const randomJoke = jokes[Math.floor(Math.random() * jokes.length)];
+  return randomJoke;
 });
 
-app.get("/api/jokes/:id", (req: Request, res: Response) => {
-	const id = parseInt(req.params.id, 10);
-	const joke = jokes.find((j) => j.id === id);
+app.get<{ Params: { id: string } }>("/api/jokes/:id", async (request, reply) => {
+  const id = parseInt(request.params.id, 10);
+  const joke = jokes.find((j) => j.id === id);
 
-	if (!joke) {
-		return res.status(404).json({ error: "Joke not found, fistro" });
-	}
+  if (!joke) {
+    return reply.status(404).send({ error: "Joke not found, fistro" });
+  }
 
-	res.json(joke);
+  return joke;
 });
 
 export default app;
