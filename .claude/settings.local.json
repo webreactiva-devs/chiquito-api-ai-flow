@@ -21,6 +21,14 @@
           {
             "type": "command",
             "command": "npm test"
+          },
+          {
+            "type": "command",
+            "command": "npm run lint"
+          },
+          {
+            "type": "command",
+            "command": "npm run check"
           }
         ]
       }

@@ -1,4 +1,8 @@
+import { dirname, join } from "node:path";
+import { fileURLToPath } from "node:url";
 import cors from "@fastify/cors";
+import fastifySwagger from "@fastify/swagger";
+import fastifySwaggerUi from "@fastify/swagger-ui";
 import Fastify from "fastify";
 import db from "./db/connection.js";
 import {
@@ -16,9 +20,28 @@ import {
 } from "./db/queries.js";
 import type { VoteType } from "./types/index.js";
 
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
 const app = Fastify({ logger: false });
 
 await app.register(cors);
+
+const isProduction = process.env.NODE_ENV === "production";
+
+if (!isProduction) {
+	await app.register(fastifySwagger, {
+		mode: "static",
+		specification: {
+			path: join(__dirname, "../spec/openapi.yaml"),
+			baseDir: join(__dirname, ".."),
+		},
+	});
+
+	await app.register(fastifySwaggerUi, {
+		routePrefix: "/docs",
+	});
+}
 
 app.get("/api/categories", async () => {
 	try {
