@@ -2,7 +2,8 @@ import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import cors from "cors";
-import express from "express";
+import express, { type Request, type Response } from "express";
+import type { Category, Joke } from "./types/index.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -12,10 +13,10 @@ app.use(cors());
 app.use(express.json());
 
 const dataPath = join(__dirname, "../data/chiquito.json");
-const { jokes } = JSON.parse(readFileSync(dataPath, "utf8"));
+const { jokes }: { jokes: Joke[] } = JSON.parse(readFileSync(dataPath, "utf8"));
 
-const buildCategoriesWithCount = (jokesData) => {
-	const categoryCount = {};
+const buildCategoriesWithCount = (jokesData: Joke[]): Category[] => {
+	const categoryCount: Record<string, number> = {};
 
 	jokesData.forEach((joke) => {
 		categoryCount[joke.category] = (categoryCount[joke.category] || 0) + 1;
@@ -27,7 +28,7 @@ const buildCategoriesWithCount = (jokesData) => {
 	}));
 };
 
-app.get("/api/categories", (_req, res) => {
+app.get("/api/categories", (_req: Request, res: Response) => {
 	try {
 		const categories = buildCategoriesWithCount(jokes);
 		res.json(categories);
@@ -38,7 +39,7 @@ app.get("/api/categories", (_req, res) => {
 	}
 });
 
-app.get("/health", (_req, res) => {
+app.get("/health", (_req: Request, res: Response) => {
 	res.json({
 		status: "OK",
 		message: "Fistro pecador de la pradera",
@@ -46,7 +47,7 @@ app.get("/health", (_req, res) => {
 	});
 });
 
-app.get("/api/jokes", (req, res) => {
+app.get("/api/jokes", (req: Request, res: Response) => {
 	const { category } = req.query;
 
 	if (category) {
@@ -57,12 +58,12 @@ app.get("/api/jokes", (req, res) => {
 	res.json(jokes);
 });
 
-app.get("/api/jokes/random", (_req, res) => {
+app.get("/api/jokes/random", (_req: Request, res: Response) => {
 	const randomJoke = jokes[Math.floor(Math.random() * jokes.length)];
 	res.json(randomJoke);
 });
 
-app.get("/api/jokes/:id", (req, res) => {
+app.get("/api/jokes/:id", (req: Request, res: Response) => {
 	const id = parseInt(req.params.id, 10);
 	const joke = jokes.find((j) => j.id === id);
 

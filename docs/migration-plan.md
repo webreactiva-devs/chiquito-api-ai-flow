@@ -3,31 +3,31 @@
 ## Fase 1: Configuración Base TypeScript
 
 ### 1.1 Instalación de dependencias
-- [ ] Instalar TypeScript y herramientas de desarrollo
+- [x] Instalar TypeScript y herramientas de desarrollo
   ```bash
   npm install -D typescript tsx @types/node
   ```
 
 ### 1.2 Configuración TypeScript
-- [ ] Crear `tsconfig.json` con ES modules y strict mode
-- [ ] Actualizar `package.json`:
+- [x] Crear `tsconfig.json` con ES modules y strict mode
+- [x] Actualizar `package.json`:
   - Cambiar scripts para usar `tsx`
   - Añadir script `build` para compilación
 
 ### 1.3 Migración de archivos
-- [ ] Renombrar `src/server.js` → `src/server.ts`
-- [ ] Renombrar `src/app.js` → `src/app.ts`
-- [ ] Añadir tipos a variables y funciones existentes
-- [ ] Crear `src/types/index.ts` con interfaces (Joke, Category, etc.)
+- [x] Renombrar `src/server.js` → `src/server.ts`
+- [x] Renombrar `src/app.js` → `src/app.ts`
+- [x] Añadir tipos a variables y funciones existentes
+- [x] Crear `src/types/index.ts` con interfaces (Joke, Category, etc.)
 
 ### 1.4 Verificación
-- [ ] Ejecutar `npm run dev` y verificar que el servidor arranca
-- [ ] Ejecutar `npm test` y verificar que todos los tests pasan
-- [ ] Probar manualmente: `curl http://localhost:3000/api/jokes`
+- [x] Ejecutar `npm run dev` y verificar que el servidor arranca
+- [x] Ejecutar `npm test` y verificar que todos los tests pasan
+- [x] Probar manualmente: `curl http://localhost:3000/api/jokes`
 
 ### 1.5 Documentación
-- [ ] Actualizar `CLAUDE.md` con nuevos comandos TypeScript
-- [ ] Actualizar `docs/openapi.yml` si hay cambios en responses
+- [x] Actualizar `CLAUDE.md` con nuevos comandos TypeScript
+- [x] Actualizar `docs/openapi.yml` si hay cambios en responses
 
 ---
 

@@ -1,7 +1,7 @@
 import assert from "node:assert";
 import { describe, it } from "node:test";
 import request from "supertest";
-import app from "../src/app.js";
+import app from "../src/app.ts";
 
 describe("Chiquito API", () => {
 	describe("GET /api/jokes", () => {
