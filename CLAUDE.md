@@ -5,18 +5,21 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Commands
 
 ```bash
-npm run dev      # Start development server with auto-reload (tsx watch)
-npm start        # Start production server (tsx)
-npm run build    # Compile TypeScript to JavaScript
-npm test         # Run all tests
-npm run lint     # Run Biome linter
-npm run check    # Run Biome checks
-npm run format   # Format code with Biome
+npm run dev              # Start development server with auto-reload (tsx watch)
+npm start                # Start production server (tsx)
+npm run build            # Compile TypeScript to JavaScript
+npm test                 # Run all tests (Vitest)
+npm run test:unit        # Run unit tests only
+npm run test:integration # Run integration tests only
+npm run test:e2e         # Run end-to-end tests only
+npm run lint             # Run Biome linter
+npm run check            # Run Biome checks
+npm run format           # Format code with Biome
 ```
 
 Run a single test by pattern:
 ```bash
-node --import tsx --test tests/app.test.js --test-name-pattern "GET /api/jokes"
+npx vitest run -t "should return all jokes"
 ```
 
 ## Architecture
@@ -41,7 +44,12 @@ This is a REST API serving Chiquito de la Calzada jokes using TypeScript and Exp
 
 ## Testing
 
-Uses Node.js built-in test runner with Supertest. Tests import the app directly from `src/app.js`.
+Uses Vitest with Supertest for HTTP testing. Testing trophy structure:
+- `tests/unit/` - Unit tests for isolated functions
+- `tests/integration/` - Integration tests for API endpoints
+- `tests/e2e/` - End-to-end tests for complete user flows
+
+Tests import the app directly from `src/app.ts`.
 
 ## Technical Notes
 

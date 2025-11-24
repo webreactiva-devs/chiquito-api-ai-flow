@@ -6,7 +6,10 @@
     "start": "tsx src/server.ts",
     "dev": "tsx watch src/server.ts",
     "build": "tsc",
-    "test": "node --import tsx --test tests/*.test.js",
+    "test:unit": "vitest run tests/unit",
+    "test:integration": "vitest run tests/integration",
+    "test:e2e": "vitest run tests/e2e",
+    "test": "vitest run",
     "lint": "biome lint src tests",
     "format": "biome format --write src tests",
     "check": "biome check src tests"

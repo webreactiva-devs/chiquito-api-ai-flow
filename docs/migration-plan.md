@@ -34,36 +34,36 @@
 ## Fase 2: Testing Trophy - Estructura Base
 
 ### 2.1 Configuración de Vitest
-- [ ] Instalar Vitest
+- [x] Instalar Vitest
   ```bash
   npm install -D vitest @vitest/coverage-v8
   ```
-- [ ] Crear `vitest.config.ts`
+- [x] Crear `vitest.config.ts`
 
 ### 2.2 Estructura de directorios
-- [ ] Crear estructura de tests:
+- [x] Crear estructura de tests:
   ```
   tests/
   ├── unit/
   ├── integration/
   └── e2e/
   ```
-- [ ] Mover `tests/app.test.js` → `tests/integration/jokes.test.ts`
-- [ ] Adaptar tests existentes a Vitest y TypeScript
+- [x] Mover `tests/app.test.js` → `tests/integration/jokes.test.ts`
+- [x] Adaptar tests existentes a Vitest y TypeScript
 
 ### 2.3 Scripts de testing
-- [ ] Añadir scripts en `package.json`:
+- [x] Añadir scripts en `package.json`:
   - `test:unit` - tests unitarios
   - `test:integration` - tests de integración
   - `test:e2e` - tests end-to-end
   - `test` - ejecuta todos en orden
 
 ### 2.4 Verificación
-- [ ] Ejecutar `npm run test:integration` y verificar que pasan los tests migrados
-- [ ] Ejecutar `npm test` completo
+- [x] Ejecutar `npm run test:integration` y verificar que pasan los tests migrados
+- [x] Ejecutar `npm test` completo
 
 ### 2.5 Documentación
-- [ ] Actualizar `CLAUDE.md` con nuevos comandos de testing
+- [x] Actualizar `CLAUDE.md` con nuevos comandos de testing
 
 ---
 
