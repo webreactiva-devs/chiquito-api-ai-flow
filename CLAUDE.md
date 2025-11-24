@@ -9,7 +9,8 @@ npm run dev              # Start development server with auto-reload (tsx watch)
 npm start                # Start production server (tsx)
 npm run build            # Compile TypeScript to JavaScript
 npm run db:init          # Initialize/reset SQLite database
-npm test                 # Run all tests (Vitest)
+npm run test:types       # Type check with tsc
+npm test                 # Run all tests (types + lint + Vitest)
 npm run test:unit        # Run unit tests only
 npm run test:integration # Run integration tests only
 npm run test:e2e         # Run end-to-end tests only
@@ -41,6 +42,8 @@ This is a REST API serving Chiquito de la Calzada jokes using TypeScript and Fas
 
 **Database tables**:
 - `jokes` - id (INTEGER PRIMARY KEY), type (TEXT), content (TEXT), category (TEXT)
+- `votes` - id (INTEGER PRIMARY KEY AUTOINCREMENT), joke_id (INTEGER FK), vote_type (TEXT), created_at (TEXT)
+- `stats` - joke_id (INTEGER PRIMARY KEY FK), views (INTEGER), last_viewed (TEXT)
 
 ## Code Style Requirements
 

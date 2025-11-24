@@ -1,7 +1,7 @@
 import type Database from "better-sqlite3";
 
 export const createTables = (db: Database.Database): void => {
-  db.exec(`
+	db.exec(`
     CREATE TABLE IF NOT EXISTS jokes (
       id INTEGER PRIMARY KEY,
       type TEXT NOT NULL,
@@ -27,7 +27,7 @@ export const createTables = (db: Database.Database): void => {
 };
 
 export const dropTables = (db: Database.Database): void => {
-  db.exec(`
+	db.exec(`
     DROP TABLE IF EXISTS stats;
     DROP TABLE IF EXISTS votes;
     DROP TABLE IF EXISTS jokes;

@@ -1,10 +1,10 @@
 import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
+import type { Joke } from "../types/index.js";
 import db from "./connection.js";
 import { insertJokes } from "./queries.js";
 import { createTables, dropTables } from "./schema.js";
-import type { Joke } from "../types/index.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);

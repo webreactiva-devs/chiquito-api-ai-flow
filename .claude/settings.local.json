@@ -8,7 +8,9 @@
       "Bash(npm run test:integration:*)",
       "Bash(npm uninstall:*)",
       "Bash(npm run db:init:*)",
-      "Bash(npm run test:unit:*)"
+      "Bash(npm run test:unit:*)",
+      "Bash(npm run format:*)",
+      "Bash(npm run check:*)"
     ]
   },
   "hooks": {
