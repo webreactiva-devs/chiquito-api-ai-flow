@@ -33,3 +33,16 @@ export interface VoteResult {
 }
 
 export type VoteType = "up" | "down";
+
+export interface GlobalStats {
+  totalJokes: number;
+  totalVotes: number;
+  totalViews: number;
+}
+
+export interface JokeWithStats extends Joke {
+  upvotes: number;
+  downvotes: number;
+  score: number;
+  views: number;
+}

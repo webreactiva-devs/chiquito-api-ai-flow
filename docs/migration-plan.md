@@ -208,7 +208,7 @@
 ## Fase 6: Sistema de Estadísticas
 
 ### 6.1 Esquema de base de datos
-- [ ] Añadir tabla `stats` en `src/db/schema.ts`:
+- [x] Añadir tabla `stats` en `src/db/schema.ts`:
   ```sql
   CREATE TABLE stats (
     joke_id INTEGER PRIMARY KEY,
@@ -217,42 +217,42 @@
     FOREIGN KEY (joke_id) REFERENCES jokes(id)
   );
   ```
-- [ ] Añadir queries de estadísticas en `src/db/queries.ts`
+- [x] Añadir queries de estadísticas en `src/db/queries.ts`
 
 ### 6.2 Tracking de vistas
-- [ ] Crear hook/middleware para incrementar vistas en:
+- [x] Crear hook/middleware para incrementar vistas en:
   - `GET /api/jokes/:id`
   - `GET /api/jokes/random`
 
 ### 6.3 Nuevos endpoints
-- [ ] `GET /api/stats` - estadísticas globales
+- [x] `GET /api/stats` - estadísticas globales
   - Response: `{ "totalJokes": number, "totalVotes": number, "totalViews": number }`
-- [ ] `GET /api/stats/top` - ranking de jokes
+- [x] `GET /api/stats/top` - ranking de jokes
   - Query params: `?by=views|votes&limit=10`
   - Response: array de jokes con stats
 
 ### 6.4 Modificar respuestas existentes
-- [ ] Añadir campo `views` en `GET /api/jokes/:id`
+- [x] Añadir campo `views` en `GET /api/jokes/:id`
 
 ### 6.5 Tests
-- [ ] Crear `tests/unit/stats.test.ts` - tests de queries de stats
-- [ ] Crear `tests/integration/stats.test.ts` - tests de endpoints
-- [ ] Actualizar tests existentes con nuevos campos
+- [x] Crear `tests/unit/stats.test.ts` - tests de queries de stats
+- [x] Crear `tests/integration/stats.test.ts` - tests de endpoints
+- [x] Actualizar tests existentes con nuevos campos
 
 ### 6.6 Verificación
-- [ ] Ejecutar `npm run db:init` para recrear BD
-- [ ] Ejecutar `npm run test:unit`
-- [ ] Ejecutar `npm run test:integration`
-- [ ] Ejecutar `npm test` completo
-- [ ] Probar manualmente:
+- [x] Ejecutar `npm run db:init` para recrear BD
+- [x] Ejecutar `npm run test:unit`
+- [x] Ejecutar `npm run test:integration`
+- [x] Ejecutar `npm test` completo
+- [x] Probar manualmente:
   ```bash
   curl http://localhost:3000/api/stats
   curl http://localhost:3000/api/stats/top?by=views&limit=5
   ```
 
 ### 6.7 Documentación
-- [ ] Actualizar `docs/openapi.yml` con endpoints de estadísticas
-- [ ] Actualizar `CLAUDE.md` con información del sistema de stats
+- [x] Actualizar `docs/openapi.yml` con endpoints de estadísticas
+- [x] Actualizar `CLAUDE.md` con información del sistema de stats
 
 ---
 
