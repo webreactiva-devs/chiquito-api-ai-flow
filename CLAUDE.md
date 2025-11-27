@@ -35,7 +35,8 @@ This is a REST API serving Chiquito de la Calzada jokes using TypeScript and Fas
 - `src/server.ts` - Server initialization only
 - `src/types/index.ts` - TypeScript interfaces (Joke, Category, etc.)
 - `src/db/connection.ts` - Database connection singleton
-- `src/db/schema.ts` - Table definitions
+- `src/db/schema.ts`
+-  - Table definitions
 - `src/db/queries.ts` - Typed query functions
 - `src/db/init.ts` - Database initialization script
 - `data/chiquito.json` - Seed data for database initialization
