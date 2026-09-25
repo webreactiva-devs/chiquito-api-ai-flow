@@ -1,11 +1,23 @@
-import { readFileSync } from "node:fs";
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import {
+	afterEach,
+	beforeEach,
+	describe,
+	expect,
+	it,
+	type MockInstance,
+	vi,
+} from "vitest";
+
+interface ServerApp {
+	listen: (options: { port: number; host: string }) => Promise<unknown>;
+	log: { error: (error: unknown) => void };
+}
 
 // We'll test the server logic by creating a separate function that contains the start logic
 // since the server.js file executes immediately when imported
 
 // Create a function that mimics the server start logic
-const createServerStartFunction = (mockApp: any) => {
+const createServerStartFunction = (mockApp: ServerApp) => {
 	return async () => {
 		const PORT = Number(process.env.PORT) || 3000;
 
@@ -22,12 +34,10 @@ const createServerStartFunction = (mockApp: any) => {
 
 describe("Server Start Logic", () => {
 	let originalEnv: typeof process.env;
-	let originalExit: typeof process.exit;
-	let mockConsoleLog: any;
+	let mockConsoleLog: MockInstance<typeof console.log>;
 
 	beforeEach(() => {
 		originalEnv = process.env;
-		originalExit = process.exit;
 		mockConsoleLog = vi.spyOn(console, "log").mockImplementation(() => {});
 	});
 
@@ -92,11 +102,9 @@ describe("Server Start Logic", () => {
 		};
 
 		// Mock process.exit to prevent actual exit during tests
-		const mockExit = vi
-			.spyOn(process, "exit")
-			.mockImplementation((code?: number) => {
-				throw new Error("process.exit called");
-			});
+		const mockExit = vi.spyOn(process, "exit").mockImplementation(() => {
+			throw new Error("process.exit called");
+		});
 
 		const start = createServerStartFunction(mockApp);
 

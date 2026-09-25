@@ -48,11 +48,9 @@ vi.spyOn(console, "log").mockImplementation(() => {});
 
 describe("Database Initialization", () => {
 	let originalEnv: typeof process.env;
-	let originalExit: typeof process.exit;
 
 	beforeEach(() => {
 		originalEnv = process.env;
-		originalExit = process.exit;
 	});
 
 	afterEach(() => {
