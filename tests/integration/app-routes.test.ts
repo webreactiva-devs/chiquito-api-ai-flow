@@ -1,9 +1,10 @@
-import { describe, it, expect, beforeEach, afterEach } from "vitest";
-import Database from "better-sqlite3";
-import { createTables } from "../../src/db/schema.js";
-import { insertJokes } from "../../src/db/queries.js";
-import type { Joke } from "../../src/types/index.js";
+import type Database from "better-sqlite3";
+import { beforeEach, describe, expect, it } from "vitest";
 import app from "../../src/app.js";
+import sharedDb from "../../src/db/connection.js";
+import { insertJokes } from "../../src/db/queries.js";
+import { createTables, dropTables } from "../../src/db/schema.js";
+import type { Joke } from "../../src/types/index.js";
 
 const testJokes: Joke[] = [
 	{ id: 1, type: "phrase", content: "Test joke 1", category: "test" },
@@ -15,14 +16,10 @@ describe("App API Routes", () => {
 	let db: Database.Database;
 
 	beforeEach(() => {
-		db = new Database(":memory:");
-		db.pragma("foreign_keys = ON");
+		db = sharedDb;
+		dropTables(db);
 		createTables(db);
 		insertJokes(db, testJokes);
-	});
-
-	afterEach(() => {
-		db.close();
 	});
 
 	describe("GET /api/categories", () => {
@@ -70,24 +67,16 @@ describe("App API Routes", () => {
 
 	describe("GET /api/jokes/random", () => {
 		it("should return null when no jokes exist", async () => {
-			// Create a new app instance with an empty database
-			const emptyDb = new Database(":memory:");
-			emptyDb.pragma("foreign_keys = ON");
-			createTables(emptyDb);
+			dropTables(db);
+			createTables(db);
 
-			// We can't easily replace the db instance in the imported app,
-			// so we'll just test that the route works normally
 			const response = await app.inject({
 				method: "GET",
 				url: "/api/jokes/random",
 			});
 
-			// This should return a joke since we have jokes in the db
 			expect(response.statusCode).toBe(200);
-			const body = response.json();
-			expect(body).toBeDefined();
-			
-			emptyDb.close();
+			expect(response.body).toBe("");
 		});
 	});
 

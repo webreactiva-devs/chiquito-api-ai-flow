@@ -1,5 +1,5 @@
-import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
 import Database from "better-sqlite3";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { getDatabase } from "../../src/db/connection.js";
 
 // Mock the database path to avoid creating actual files
@@ -38,7 +38,7 @@ describe("Database Connection", () => {
 	it("should return in-memory database when path is :memory:", () => {
 		const db = getDatabase(":memory:");
 		expect(db).toBeInstanceOf(Database);
-		
+
 		// Verify it's an in-memory database by checking that it's different from default
 		const defaultDb = getDatabase();
 		expect(db).not.toBe(defaultDb);

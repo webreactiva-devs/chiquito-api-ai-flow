@@ -4,6 +4,10 @@ export default defineConfig({
   test: {
     globals: true,
     environment: "node",
+    env: {
+      DATABASE_PATH: ":memory:",
+    },
+    setupFiles: ["tests/setup.ts"],
     include: ["tests/**/*.test.ts"],
     coverage: {
       provider: "v8",

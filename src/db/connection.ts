@@ -1,6 +1,7 @@
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import Database, { type Database as DatabaseType } from "better-sqlite3";
+import { createTables } from "./schema.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -11,6 +12,7 @@ const dbPath =
 const db: DatabaseType = new Database(dbPath);
 db.pragma("journal_mode = WAL");
 db.pragma("foreign_keys = ON");
+createTables(db);
 
 export default db;
 
