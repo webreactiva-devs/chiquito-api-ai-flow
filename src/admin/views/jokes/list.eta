@@ -13,6 +13,18 @@
 	</div>
 	<a href="/admin/jokes/new" class="btn btn-primary">+ New joke</a>
 </div>
+<form method="get" action="/admin/jokes" class="card mb-6 flex flex-col gap-3 p-4 sm:flex-row sm:items-end" role="search">
+	<div class="sm:w-56">
+		<label class="label" for="category">Category</label>
+		<select class="field" id="category" name="category">
+			<option value="">All</option>
+			<% it.categories.forEach((category) => { %>
+			<option value="<%= category %>"<%= category === it.filters.category ? " selected" : "" %>><%= category %></option>
+			<% }) %>
+		</select>
+	</div>
+	<button type="submit" class="btn btn-navy">Filter</button>
+</form>
 <div class="card overflow-hidden">
 	<div class="overflow-x-auto">
 		<table class="jokes-table w-full min-w-[820px] text-left">

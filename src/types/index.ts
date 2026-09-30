@@ -74,3 +74,7 @@ export interface JokeWithActivity extends Joke {
 	downvotes: number;
 	views: number;
 }
+
+export interface JokeListFilters {
+	category?: string;
+}

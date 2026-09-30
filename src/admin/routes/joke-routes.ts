@@ -74,12 +74,18 @@ export const jokeRoutes: FastifyPluginAsync<AdminPluginOptions> = async (
 
 	app.get("/", (_request, reply) => reply.redirect("/admin/jokes"));
 
-	app.get<{ Querystring: { notice?: string } }>("/jokes", (request, reply) =>
-		reply.view("jokes/list.eta", {
-			session: request.adminSession,
-			notice: LIST_NOTICES.get(request.query.notice ?? ""),
-			jokes: listJokesWithActivity(db),
-		}),
+	app.get<{ Querystring: { notice?: string; category?: string } }>(
+		"/jokes",
+		(request, reply) => {
+			const filters = { category: request.query.category ?? "" };
+			return reply.view("jokes/list.eta", {
+				session: request.adminSession,
+				notice: LIST_NOTICES.get(request.query.notice ?? ""),
+				categories: getCategories(db).map(({ name }) => name),
+				filters,
+				jokes: listJokesWithActivity(db, filters),
+			});
+		},
 	);
 
 	app.get("/jokes/new", (request, reply) =>

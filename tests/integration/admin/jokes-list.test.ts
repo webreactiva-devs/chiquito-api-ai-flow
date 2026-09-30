@@ -93,4 +93,18 @@ describe("Admin joke list", () => {
 		);
 		expect(numbers).toEqual([2, 1, 1]);
 	});
+
+	it("should filter the list by category", async () => {
+		const response = await app.inject({
+			method: "GET",
+			url: `/admin/jokes?category=${encodeURIComponent("clásico")}`,
+			headers: { cookie },
+		});
+
+		expect(response.body).toContain("¡Hasta luego, Lucas!");
+		expect(response.body).not.toContain(
+			"Paso más hambre que el sastre de Tarzán.",
+		);
+		expect(response.body).toContain('<option value="clásico" selected>');
+	});
 });

@@ -3,6 +3,7 @@ import type {
 	Category,
 	GlobalStats,
 	Joke,
+	JokeListFilters,
 	JokeWithActivity,
 	JokeWithStats,
 	NewJoke,
@@ -245,7 +246,16 @@ export const deleteJokeWithVotesAndStats = (
 
 export const listJokesWithActivity = (
 	db: Database.Database,
+	{ category }: JokeListFilters = {},
 ): JokeWithActivity[] => {
+	const conditions: string[] = [];
+	const parameters: string[] = [];
+	if (category) {
+		conditions.push("j.category = ?");
+		parameters.push(category);
+	}
+	const where = conditions.length ? `WHERE ${conditions.join(" AND ")}` : "";
+
 	return db
 		.prepare(`
     SELECT
@@ -255,7 +265,8 @@ export const listJokesWithActivity = (
       COALESCE(s.views, 0) as views
     FROM jokes j
     LEFT JOIN stats s ON s.joke_id = j.id
+    ${where}
     ORDER BY j.id
   `)
-		.all() as JokeWithActivity[];
+		.all(...parameters) as JokeWithActivity[];
 };
