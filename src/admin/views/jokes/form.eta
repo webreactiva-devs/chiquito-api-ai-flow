@@ -1,22 +1,40 @@
 <% layout("/layout", { title: "New joke", session: it.session }) %>
+<% const errorCount = Object.keys(it.errors).length %>
 <a href="/admin/jokes" class="font-bold underline">« Back to the jokes</a>
 <h1 class="mt-4 mb-6 font-display text-3xl leading-none sm:text-4xl">New joke</h1>
-<form method="post" action="/admin/jokes" class="card max-w-2xl space-y-5 p-6 sm:p-8">
+<% if (errorCount > 0) { %>
+<div class="alert alert-error mb-6 max-w-2xl" role="alert">
+	<span class="alert-icon" aria-hidden="true">!</span>
+	<div>
+		<p>Fix <%= errorCount %> <%= errorCount === 1 ? "error" : "errors" %>, pecador:</p>
+		<ul class="mt-1 list-disc pl-5 font-medium">
+			<% Object.values(it.errors).forEach((error) => { %>
+			<li><%= error %></li>
+			<% }) %>
+		</ul>
+	</div>
+</div>
+<% } %>
+<form method="post" action="/admin/jokes" class="card max-w-2xl space-y-5 p-6 sm:p-8" novalidate>
 	<input type="hidden" name="_csrf" value="<%= it.session.csrfToken %>">
 	<div>
 		<label class="label" for="type">Type</label>
-		<select class="field" id="type" name="type">
-			<option value="phrase">phrase</option>
-			<option value="joke">joke</option>
+		<select class="field <%= it.errors.type ? 'field-invalid' : '' %>" id="type" name="type"<% if (it.errors.type) { %> aria-describedby="type-error"<% } %>>
+			<% it.jokeTypes.forEach((jokeType) => { %>
+			<option value="<%= jokeType %>"<%= jokeType === it.values.type ? " selected" : "" %>><%= jokeType %></option>
+			<% }) %>
 		</select>
+		<% if (it.errors.type) { %><p id="type-error" class="mt-1 font-bold text-tomato-deep"><%= it.errors.type %></p><% } %>
 	</div>
 	<div>
 		<label class="label" for="category">Category</label>
-		<input class="field" id="category" name="category" type="text">
+		<input class="field <%= it.errors.category ? 'field-invalid' : '' %>" id="category" name="category" type="text" value="<%= it.values.category %>"<% if (it.errors.category) { %> aria-describedby="category-error"<% } %>>
+		<% if (it.errors.category) { %><p id="category-error" class="mt-1 font-bold text-tomato-deep"><%= it.errors.category %></p><% } %>
 	</div>
 	<div>
 		<label class="label" for="content">Content</label>
-		<textarea class="field" id="content" name="content" rows="5"></textarea>
+		<textarea class="field <%= it.errors.content ? 'field-invalid' : '' %>" id="content" name="content" rows="5"<% if (it.errors.content) { %> aria-describedby="content-error"<% } %>><%= it.values.content %></textarea>
+		<% if (it.errors.content) { %><p id="content-error" class="mt-1 font-bold text-tomato-deep"><%= it.errors.content %></p><% } %>
 	</div>
 	<div class="flex flex-wrap gap-3">
 		<button type="submit" class="btn btn-primary">Create joke</button>
