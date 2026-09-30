@@ -1,7 +1,7 @@
 import { beforeAll, describe, expect, it } from "vitest";
 import app from "../../../src/app.js";
 import db from "../../../src/db/connection.js";
-import { createJoke } from "../../../src/db/queries.js";
+import { addVote, createJoke } from "../../../src/db/queries.js";
 import { logInAsNewAdmin } from "../../helpers/admin.js";
 
 describe("Admin joke list", () => {
@@ -70,5 +70,27 @@ describe("Admin joke list", () => {
 		});
 
 		expect(response.body).not.toContain('role="status"');
+	});
+
+	it("should show the votes and views of each joke", async () => {
+		const jokeId = createJoke(db, {
+			type: "phrase",
+			category: "clásico",
+			content: "¡Te das cuen!",
+		});
+		addVote(db, jokeId, "up");
+		addVote(db, jokeId, "up");
+		addVote(db, jokeId, "down");
+		await app.inject({ method: "GET", url: `/api/jokes/${jokeId}` });
+
+		const response = await getList();
+
+		const row = response.body
+			.split("<tr>")
+			.find((cells) => cells.includes(`/admin/jokes/${jokeId}/edit`));
+		const numbers = [...(row ?? "").matchAll(/tabular-nums">(\d+)</g)].map(
+			([, value]) => Number(value),
+		);
+		expect(numbers).toEqual([2, 1, 1]);
 	});
 });

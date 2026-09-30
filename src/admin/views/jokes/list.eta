@@ -15,13 +15,16 @@
 </div>
 <div class="card overflow-hidden">
 	<div class="overflow-x-auto">
-		<table class="jokes-table w-full min-w-[640px] text-left">
+		<table class="jokes-table w-full min-w-[820px] text-left">
 			<thead>
 				<tr>
 					<th scope="col">ID</th>
 					<th scope="col">Type</th>
 					<th scope="col">Content</th>
 					<th scope="col">Category</th>
+					<th scope="col" class="text-right">Up</th>
+					<th scope="col" class="text-right">Down</th>
+					<th scope="col" class="text-right">Views</th>
 					<th scope="col" class="text-right">Actions</th>
 				</tr>
 			</thead>
@@ -32,6 +35,9 @@
 					<td><span class="sticker <%= joke.type === 'joke' ? 'sticker-joke' : 'sticker-phrase' %>"><%= joke.type %></span></td>
 					<td><div class="max-w-[24rem] truncate" title="<%= joke.content %>"><%= joke.content %></div></td>
 					<td><span class="chip"><%= joke.category %></span></td>
+					<td class="text-right tabular-nums"><%= joke.upvotes %></td>
+					<td class="text-right tabular-nums"><%= joke.downvotes %></td>
+					<td class="text-right tabular-nums"><%= joke.views %></td>
 					<td><div class="flex justify-end gap-2"><a class="btn btn-plain btn-sm" href="/admin/jokes/<%= joke.id %>/edit">Edit<span class="sr-only"> joke <%= joke.id %></span></a><a class="btn btn-danger btn-sm" href="/admin/jokes/<%= joke.id %>/delete">Delete<span class="sr-only"> joke <%= joke.id %></span></a></div></td>
 				</tr>
 				<% }) %>

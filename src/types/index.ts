@@ -68,3 +68,9 @@ export interface AdminSession {
 	createdAt: string;
 	expiresAt: string;
 }
+
+export interface JokeWithActivity extends Joke {
+	upvotes: number;
+	downvotes: number;
+	views: number;
+}

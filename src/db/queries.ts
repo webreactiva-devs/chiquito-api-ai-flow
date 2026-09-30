@@ -3,6 +3,7 @@ import type {
 	Category,
 	GlobalStats,
 	Joke,
+	JokeWithActivity,
 	JokeWithStats,
 	NewJoke,
 	VoteResult,
@@ -240,4 +241,21 @@ export const deleteJokeWithVotesAndStats = (
 		db.prepare("DELETE FROM stats WHERE joke_id = ?").run(id);
 		db.prepare("DELETE FROM jokes WHERE id = ?").run(id);
 	})();
+};
+
+export const listJokesWithActivity = (
+	db: Database.Database,
+): JokeWithActivity[] => {
+	return db
+		.prepare(`
+    SELECT
+      j.id, j.type, j.content, j.category,
+      (SELECT COUNT(*) FROM votes v WHERE v.joke_id = j.id AND v.vote_type = 'up') as upvotes,
+      (SELECT COUNT(*) FROM votes v WHERE v.joke_id = j.id AND v.vote_type = 'down') as downvotes,
+      COALESCE(s.views, 0) as views
+    FROM jokes j
+    LEFT JOIN stats s ON s.joke_id = j.id
+    ORDER BY j.id
+  `)
+		.all() as JokeWithActivity[];
 };

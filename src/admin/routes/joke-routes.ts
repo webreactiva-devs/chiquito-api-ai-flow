@@ -2,10 +2,10 @@ import type { FastifyPluginAsync, FastifyReply, FastifyRequest } from "fastify";
 import {
 	createJoke,
 	deleteJokeWithVotesAndStats,
-	getAllJokes,
 	getCategories,
 	getJokeById,
 	getJokeDeleteImpact,
+	listJokesWithActivity,
 	updateJoke,
 } from "../../db/queries.js";
 import type { NewJoke } from "../../types/index.js";
@@ -78,7 +78,7 @@ export const jokeRoutes: FastifyPluginAsync<AdminPluginOptions> = async (
 		reply.view("jokes/list.eta", {
 			session: request.adminSession,
 			notice: LIST_NOTICES.get(request.query.notice ?? ""),
-			jokes: getAllJokes(db),
+			jokes: listJokesWithActivity(db),
 		}),
 	);
 
