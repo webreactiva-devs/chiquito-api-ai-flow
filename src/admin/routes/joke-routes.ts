@@ -13,15 +13,21 @@ const jokeBodySchema = {
 	},
 };
 
+const LIST_NOTICES = new Map([
+	["welcome", "Welcome back, pecador."],
+	["created", "Joke created."],
+]);
+
 export const jokeRoutes: FastifyPluginAsync<AdminPluginOptions> = async (
 	app,
 	{ db },
 ) => {
 	app.get("/", (_request, reply) => reply.redirect("/admin/jokes"));
 
-	app.get("/jokes", (request, reply) =>
+	app.get<{ Querystring: { notice?: string } }>("/jokes", (request, reply) =>
 		reply.view("jokes/list.eta", {
 			session: request.adminSession,
+			notice: LIST_NOTICES.get(request.query.notice ?? ""),
 			jokes: getAllJokes(db),
 		}),
 	);
@@ -36,7 +42,7 @@ export const jokeRoutes: FastifyPluginAsync<AdminPluginOptions> = async (
 		(request, reply) => {
 			const { type, category, content } = request.body;
 			createJoke(db, { type, category, content });
-			return reply.redirect("/admin/jokes");
+			return reply.redirect("/admin/jokes?notice=created");
 		},
 	);
 };

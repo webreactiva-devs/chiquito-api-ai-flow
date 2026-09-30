@@ -85,7 +85,9 @@ export const sessionRoutes: FastifyPluginAsync<AdminPluginOptions> = async (
 				path: "/admin",
 				secure: secureCookie,
 			});
-			return reply.redirect(resolveNextPath(next));
+			return reply.redirect(
+				next ? resolveNextPath(next) : "/admin/jokes?notice=welcome",
+			);
 		},
 	);
 };

@@ -48,7 +48,7 @@ describe("Admin login", () => {
 		const response = await logIn(email.toUpperCase());
 
 		expect(response.statusCode).toBe(302);
-		expect(response.headers.location).toBe("/admin/jokes");
+		expect(response.headers.location).toBe("/admin/jokes?notice=welcome");
 		const cookie = response.cookies.find(({ name }) => name === "sid");
 		expect(cookie).toMatchObject({
 			httpOnly: true,

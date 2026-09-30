@@ -36,7 +36,7 @@ describe("Admin main path", () => {
 			session,
 		);
 		expect(createResponse.statusCode).toBe(302);
-		expect(createResponse.headers.location).toBe("/admin/jokes");
+		expect(createResponse.headers.location).toBe("/admin/jokes?notice=created");
 
 		const publicJokes = await app.inject({ method: "GET", url: "/api/jokes" });
 		const created = publicJokes

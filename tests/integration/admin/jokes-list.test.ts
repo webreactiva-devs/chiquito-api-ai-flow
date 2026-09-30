@@ -45,4 +45,30 @@ describe("Admin joke list", () => {
 		expect(response.body).toContain("&lt;script&gt;");
 		expect(response.body).not.toContain("<script>alert");
 	});
+
+	it.each([
+		["welcome", "Welcome back, pecador."],
+		["created", "Joke created."],
+	])("should show the %s notice", async (notice, message) => {
+		const response = await app.inject({
+			method: "GET",
+			url: `/admin/jokes?notice=${notice}`,
+			headers: { cookie },
+		});
+
+		expect(response.body).toContain(message);
+	});
+
+	it.each([
+		"unknown",
+		"toString",
+	])("should show no notice for %s", async (notice) => {
+		const response = await app.inject({
+			method: "GET",
+			url: `/admin/jokes?notice=${notice}`,
+			headers: { cookie },
+		});
+
+		expect(response.body).not.toContain('role="status"');
+	});
 });
