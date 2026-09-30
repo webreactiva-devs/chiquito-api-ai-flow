@@ -1,5 +1,6 @@
 import type { FastifyPluginAsync, FastifyReply, FastifyRequest } from "fastify";
 import {
+	countJokes,
 	createJoke,
 	deleteJokeWithVotesAndStats,
 	getCategories,
@@ -16,10 +17,18 @@ import {
 	MAX_CONTENT_LENGTH,
 	validateJokeForm,
 } from "../joke-form.js";
+import { JOKES_PER_PAGE, paginate, parsePage } from "../pagination.js";
 import type { AdminPluginOptions } from "../plugin.js";
 
 interface JokeParams {
 	id: string;
+}
+
+interface JokeListQuery {
+	notice?: string;
+	category?: string;
+	q?: string;
+	page?: string;
 }
 
 const jokeBodySchema = {
@@ -40,6 +49,21 @@ const LIST_NOTICES = new Map([
 ]);
 
 const EMPTY_JOKE: NewJoke = { type: "phrase", category: "", content: "" };
+
+const jokeListUrl = (
+	{ category, search }: { category: string; search: string },
+	page: number,
+): string => {
+	const query = new URLSearchParams();
+	if (category) {
+		query.set("category", category);
+	}
+	if (search) {
+		query.set("q", search);
+	}
+	query.set("page", String(page));
+	return `/admin/jokes?${query}`;
+};
 
 const renderJokeNotFound = (request: FastifyRequest, reply: FastifyReply) =>
 	reply
@@ -74,22 +98,27 @@ export const jokeRoutes: FastifyPluginAsync<AdminPluginOptions> = async (
 
 	app.get("/", (_request, reply) => reply.redirect("/admin/jokes"));
 
-	app.get<{ Querystring: { notice?: string; category?: string; q?: string } }>(
-		"/jokes",
-		(request, reply) => {
-			const filters = {
-				category: request.query.category ?? "",
-				search: request.query.q ?? "",
-			};
-			return reply.view("jokes/list.eta", {
-				session: request.adminSession,
-				notice: LIST_NOTICES.get(request.query.notice ?? ""),
-				categories: getCategories(db).map(({ name }) => name),
-				filters,
-				jokes: listJokesWithActivity(db, filters),
-			});
-		},
-	);
+	app.get<{ Querystring: JokeListQuery }>("/jokes", (request, reply) => {
+		const { notice, category = "", q: search = "", page } = request.query;
+		const filters = { category, search };
+		const pagination = paginate(
+			countJokes(db, filters),
+			parsePage(page),
+			JOKES_PER_PAGE,
+		);
+		return reply.view("jokes/list.eta", {
+			session: request.adminSession,
+			notice: LIST_NOTICES.get(notice ?? ""),
+			categories: getCategories(db).map(({ name }) => name),
+			filters,
+			pagination,
+			pageUrl: (targetPage: number) => jokeListUrl(filters, targetPage),
+			jokes: listJokesWithActivity(db, filters, {
+				limit: JOKES_PER_PAGE,
+				offset: pagination.offset,
+			}),
+		});
+	});
 
 	app.get("/jokes/new", (request, reply) =>
 		renderJokeForm(request, reply, EMPTY_JOKE),

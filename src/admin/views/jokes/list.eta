@@ -61,3 +61,16 @@
 		</table>
 	</div>
 </div>
+<nav class="mt-6 flex flex-wrap items-center justify-between gap-3" aria-label="Pagination">
+	<% if (it.pagination.hasPrevious) { %>
+	<a class="btn btn-plain btn-sm" href="<%= it.pageUrl(it.pagination.page - 1) %>">« Previous</a>
+	<% } else { %>
+	<span class="btn btn-plain btn-sm btn-disabled" aria-disabled="true">« Previous</span>
+	<% } %>
+	<p class="font-bold">Page <%= it.pagination.page %> of <%= it.pagination.pageCount %> (<%= it.pagination.total %> <%= it.pagination.total === 1 ? "joke" : "jokes" %>)</p>
+	<% if (it.pagination.hasNext) { %>
+	<a class="btn btn-plain btn-sm" href="<%= it.pageUrl(it.pagination.page + 1) %>">Next »</a>
+	<% } else { %>
+	<span class="btn btn-plain btn-sm btn-disabled" aria-disabled="true">Next »</span>
+	<% } %>
+</nav>

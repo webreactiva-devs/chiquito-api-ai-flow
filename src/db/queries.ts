@@ -245,10 +245,7 @@ export const deleteJokeWithVotesAndStats = (
 	})();
 };
 
-export const listJokesWithActivity = (
-	db: Database.Database,
-	{ category, search }: JokeListFilters = {},
-): JokeWithActivity[] => {
+const buildJokeFilter = ({ category, search }: JokeListFilters) => {
 	const conditions: string[] = [];
 	const parameters: string[] = [];
 	if (category) {
@@ -260,7 +257,26 @@ export const listJokesWithActivity = (
 		parameters.push(`%${escapeLikePattern(search.toLowerCase())}%`);
 	}
 	const where = conditions.length ? `WHERE ${conditions.join(" AND ")}` : "";
+	return { where, parameters };
+};
 
+export const countJokes = (
+	db: Database.Database,
+	filters: JokeListFilters = {},
+): number => {
+	const { where, parameters } = buildJokeFilter(filters);
+	const result = db
+		.prepare(`SELECT COUNT(*) as count FROM jokes j ${where}`)
+		.get(...parameters) as { count: number };
+	return result.count;
+};
+
+export const listJokesWithActivity = (
+	db: Database.Database,
+	filters: JokeListFilters = {},
+	{ limit, offset } = { limit: -1, offset: 0 },
+): JokeWithActivity[] => {
+	const { where, parameters } = buildJokeFilter(filters);
 	return db
 		.prepare(`
     SELECT
@@ -272,6 +288,7 @@ export const listJokesWithActivity = (
     LEFT JOIN stats s ON s.joke_id = j.id
     ${where}
     ORDER BY j.id
+    LIMIT ? OFFSET ?
   `)
-		.all(...parameters) as JokeWithActivity[];
+		.all(...parameters, limit, offset) as JokeWithActivity[];
 };
