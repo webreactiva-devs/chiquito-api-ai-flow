@@ -29,6 +29,13 @@
 	</div>
 	<button type="submit" class="btn btn-navy">Filter</button>
 </form>
+<% if (it.jokes.length === 0) { %>
+<div class="card p-8 text-center">
+	<p class="font-display text-2xl">¡No puedor!</p>
+	<p class="mt-2 font-medium">No jokes on this page.</p>
+	<a href="<%= it.pageUrl(1) %>" class="btn btn-primary mt-6">Go to page 1</a>
+</div>
+<% } else { %>
 <div class="card overflow-hidden">
 	<div class="overflow-x-auto">
 		<table class="jokes-table w-full min-w-[820px] text-left">
@@ -61,6 +68,7 @@
 		</table>
 	</div>
 </div>
+<% } %>
 <nav class="mt-6 flex flex-wrap items-center justify-between gap-3" aria-label="Pagination">
 	<% if (it.pagination.hasPrevious) { %>
 	<a class="btn btn-plain btn-sm" href="<%= it.pageUrl(it.pagination.page - 1) %>">« Previous</a>

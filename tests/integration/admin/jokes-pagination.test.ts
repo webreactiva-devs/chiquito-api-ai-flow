@@ -64,4 +64,15 @@ describe("Admin joke list pagination", () => {
 
 		expect(response.body).toContain("Page 1 of 3 (45 jokes)");
 	});
+
+	it("should show an empty state for a page without jokes", async () => {
+		const response = await getList(`?category=familia&q=zzz&page=4`);
+
+		expect(response.body).toContain("No jokes on this page.");
+		expect(response.body).toContain(
+			'href="/admin/jokes?category=familia&amp;q=zzz&amp;page=1"',
+		);
+		expect(response.body).toContain("Page 4 of 1 (0 jokes)");
+		expect(response.body).not.toContain("<table");
+	});
 });
