@@ -47,5 +47,8 @@
 	<div class="flex flex-wrap gap-3">
 		<button type="submit" class="btn btn-primary"><%= isEdit ? "Save changes" : "Create joke" %></button>
 		<a href="/admin/jokes" class="btn btn-plain">Cancel</a>
+		<% if (isEdit) { %>
+		<a href="/admin/jokes/<%= it.jokeId %>/delete" class="ml-auto self-center font-bold text-tomato-deep underline">Delete this joke</a>
+		<% } %>
 	</div>
 </form>

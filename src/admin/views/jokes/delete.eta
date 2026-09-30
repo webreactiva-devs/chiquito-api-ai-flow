@@ -1,0 +1,19 @@
+<% layout("/layout", { title: `Delete joke #${it.joke.id}`, session: it.session }) %>
+<a href="/admin/jokes" class="font-bold underline">« Back to the jokes</a>
+<div class="card mt-4 max-w-2xl p-6 sm:p-8">
+	<h1 class="font-display text-3xl leading-none">Delete joke #<%= it.joke.id %>?</h1>
+	<blockquote class="mt-6 rounded-2xl border-2 border-dashed border-navy bg-cream p-4 text-lg font-medium"><%= it.joke.content %></blockquote>
+	<p class="mt-4 flex flex-wrap items-center gap-3">
+		<span class="sticker <%= it.joke.type === 'joke' ? 'sticker-joke' : 'sticker-phrase' %>"><%= it.joke.type %></span>
+		<span class="chip"><%= it.joke.category %></span>
+	</p>
+	<div class="alert alert-error mt-6" role="alert">
+		<span class="alert-icon" aria-hidden="true">!</span>
+		<p>This also deletes <%= it.impact.votes %> <%= it.impact.votes === 1 ? "vote" : "votes" %> and <%= it.impact.views %> <%= it.impact.views === 1 ? "view" : "views" %>. You cannot undo this.</p>
+	</div>
+	<form method="post" action="/admin/jokes/<%= it.joke.id %>/delete" class="mt-6 flex flex-wrap gap-3">
+		<input type="hidden" name="_csrf" value="<%= it.session.csrfToken %>">
+		<a href="/admin/jokes" class="btn btn-plain">Cancel</a>
+		<button type="submit" class="btn btn-danger">Delete joke</button>
+	</form>
+</div>

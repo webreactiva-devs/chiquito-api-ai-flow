@@ -1,8 +1,10 @@
 import type { FastifyPluginAsync, FastifyReply, FastifyRequest } from "fastify";
 import {
 	createJoke,
+	deleteJokeWithVotesAndStats,
 	getAllJokes,
 	getJokeById,
+	getJokeDeleteImpact,
 	updateJoke,
 } from "../../db/queries.js";
 import type { NewJoke } from "../../types/index.js";
@@ -31,6 +33,7 @@ const LIST_NOTICES = new Map([
 	["welcome", "Welcome back, pecador."],
 	["created", "Joke created."],
 	["updated", "Joke updated."],
+	["deleted", "Joke deleted, with its votes and views."],
 ]);
 
 const EMPTY_JOKE: NewJoke = { type: "phrase", category: "", content: "" };
@@ -119,4 +122,25 @@ export const jokeRoutes: FastifyPluginAsync<AdminPluginOptions> = async (
 			return reply.redirect("/admin/jokes?notice=updated");
 		},
 	);
+
+	app.get<{ Params: JokeParams }>("/jokes/:id/delete", (request, reply) => {
+		const joke = findJoke(request.params);
+		if (!joke) {
+			return renderJokeNotFound(request, reply);
+		}
+		return reply.view("jokes/delete.eta", {
+			session: request.adminSession,
+			joke,
+			impact: getJokeDeleteImpact(db, joke.id),
+		});
+	});
+
+	app.post<{ Params: JokeParams }>("/jokes/:id/delete", (request, reply) => {
+		const joke = findJoke(request.params);
+		if (!joke) {
+			return renderJokeNotFound(request, reply);
+		}
+		deleteJokeWithVotesAndStats(db, joke.id);
+		return reply.redirect("/admin/jokes?notice=deleted");
+	});
 };

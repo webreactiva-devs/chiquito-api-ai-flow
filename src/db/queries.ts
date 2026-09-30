@@ -217,3 +217,27 @@ export const updateJoke = (
 		"UPDATE jokes SET type = ?, content = ?, category = ? WHERE id = ?",
 	).run(joke.type, joke.content, joke.category, id);
 };
+
+export const getJokeDeleteImpact = (
+	db: Database.Database,
+	id: number,
+): { votes: number; views: number } => {
+	return db
+		.prepare(`
+    SELECT
+      (SELECT COUNT(*) FROM votes WHERE joke_id = ?) as votes,
+      COALESCE((SELECT views FROM stats WHERE joke_id = ?), 0) as views
+  `)
+		.get(id, id) as { votes: number; views: number };
+};
+
+export const deleteJokeWithVotesAndStats = (
+	db: Database.Database,
+	id: number,
+): void => {
+	db.transaction(() => {
+		db.prepare("DELETE FROM votes WHERE joke_id = ?").run(id);
+		db.prepare("DELETE FROM stats WHERE joke_id = ?").run(id);
+		db.prepare("DELETE FROM jokes WHERE id = ?").run(id);
+	})();
+};
