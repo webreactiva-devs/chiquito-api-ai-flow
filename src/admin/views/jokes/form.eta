@@ -1,7 +1,9 @@
-<% layout("/layout", { title: "New joke", session: it.session }) %>
+<% const isEdit = it.jokeId !== undefined %>
+<% const title = isEdit ? `Edit joke #${it.jokeId}` : "New joke" %>
+<% layout("/layout", { title, session: it.session }) %>
 <% const errorCount = Object.keys(it.errors).length %>
 <a href="/admin/jokes" class="font-bold underline">« Back to the jokes</a>
-<h1 class="mt-4 mb-6 font-display text-3xl leading-none sm:text-4xl">New joke</h1>
+<h1 class="mt-4 mb-6 font-display text-3xl leading-none sm:text-4xl"><%= title %></h1>
 <% if (errorCount > 0) { %>
 <div class="alert alert-error mb-6 max-w-2xl" role="alert">
 	<span class="alert-icon" aria-hidden="true">!</span>
@@ -15,8 +17,14 @@
 	</div>
 </div>
 <% } %>
-<form method="post" action="/admin/jokes" class="card max-w-2xl space-y-5 p-6 sm:p-8" novalidate>
+<form method="post" action="<%= isEdit ? `/admin/jokes/${it.jokeId}` : '/admin/jokes' %>" class="card max-w-2xl space-y-5 p-6 sm:p-8" novalidate>
 	<input type="hidden" name="_csrf" value="<%= it.session.csrfToken %>">
+	<% if (isEdit) { %>
+	<div>
+		<span class="label">ID</span>
+		<span class="chip font-display"><%= it.jokeId %></span>
+	</div>
+	<% } %>
 	<div>
 		<label class="label" for="type">Type</label>
 		<select class="field <%= it.errors.type ? 'field-invalid' : '' %>" id="type" name="type"<% if (it.errors.type) { %> aria-describedby="type-error"<% } %>>
@@ -37,7 +45,7 @@
 		<% if (it.errors.content) { %><p id="content-error" class="mt-1 font-bold text-tomato-deep"><%= it.errors.content %></p><% } %>
 	</div>
 	<div class="flex flex-wrap gap-3">
-		<button type="submit" class="btn btn-primary">Create joke</button>
+		<button type="submit" class="btn btn-primary"><%= isEdit ? "Save changes" : "Create joke" %></button>
 		<a href="/admin/jokes" class="btn btn-plain">Cancel</a>
 	</div>
 </form>

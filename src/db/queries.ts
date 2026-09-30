@@ -207,3 +207,13 @@ export const getTopJokes = (
 			return { ...r, score: r.upvotes - r.downvotes };
 		}) as JokeWithStats[];
 };
+
+export const updateJoke = (
+	db: Database.Database,
+	id: number,
+	joke: NewJoke,
+): void => {
+	db.prepare(
+		"UPDATE jokes SET type = ?, content = ?, category = ? WHERE id = ?",
+	).run(joke.type, joke.content, joke.category, id);
+};
