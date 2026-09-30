@@ -8,6 +8,7 @@ import {
 	findSessionById,
 } from "../db/admin-queries.js";
 import type { AdminSession } from "../types/index.js";
+import { loginPath } from "./next-path.js";
 
 declare module "fastify" {
 	interface FastifyRequest {
@@ -45,12 +46,18 @@ export const requireSession =
 	async (request, reply) => {
 		const sessionId = request.cookies[SESSION_COOKIE];
 		const session = sessionId ? findSessionById(db, sessionId) : undefined;
-		if (!session) {
-			return reply.redirect("/admin/login");
+		if (session && !isSessionExpired(session, new Date())) {
+			request.adminSession = session;
+			return;
 		}
-		if (isSessionExpired(session, new Date())) {
+
+		if (session) {
 			deleteSession(db, session.id);
-			return reply.redirect("/admin/login?state=expired");
 		}
-		request.adminSession = session;
+		return reply.redirect(
+			loginPath({
+				state: session ? "expired" : undefined,
+				next: request.method === "GET" ? request.url : undefined,
+			}),
+		);
 	};

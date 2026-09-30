@@ -36,7 +36,9 @@ describe("Admin session expiry", () => {
 		});
 
 		expect(response.statusCode).toBe(302);
-		expect(response.headers.location).toBe("/admin/login?state=expired");
+		expect(response.headers.location).toBe(
+			"/admin/login?state=expired&next=%2Fadmin%2Fjokes",
+		);
 		expect(
 			db.prepare("SELECT id FROM sessions WHERE id = ?").get(sessionId),
 		).toBeUndefined();

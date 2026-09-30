@@ -1,14 +1,24 @@
 import { describe, expect, it } from "vitest";
 import app from "../../../src/app.js";
 import db from "../../../src/db/connection.js";
-import { createTestAdmin, logIn } from "../../helpers/admin.js";
+import {
+	createTestAdmin,
+	logIn,
+	postForm,
+	TEST_PASSWORD,
+} from "../../helpers/admin.js";
 
 describe("Admin login", () => {
-	it("should redirect to the login page without a session", async () => {
-		const response = await app.inject({ method: "GET", url: "/admin/jokes" });
+	it("should redirect to the login page with the requested path", async () => {
+		const response = await app.inject({
+			method: "GET",
+			url: "/admin/jokes/new",
+		});
 
 		expect(response.statusCode).toBe(302);
-		expect(response.headers.location).toBe("/admin/login");
+		expect(response.headers.location).toBe(
+			"/admin/login?next=%2Fadmin%2Fjokes%2Fnew",
+		);
 	});
 
 	it("should redirect to the login page with an unknown session", async () => {
@@ -19,7 +29,9 @@ describe("Admin login", () => {
 		});
 
 		expect(response.statusCode).toBe(302);
-		expect(response.headers.location).toBe("/admin/login");
+		expect(response.headers.location).toBe(
+			"/admin/login?next=%2Fadmin%2Fjokes",
+		);
 	});
 
 	it("should show the login form", async () => {
@@ -58,6 +70,7 @@ describe("Admin login", () => {
 
 		expect(response.statusCode).toBe(401);
 		expect(response.body).toContain("Invalid email or password.");
+		expect(response.body).toContain(`value="${email}"`);
 		expect(response.cookies).toHaveLength(0);
 	});
 
@@ -67,5 +80,44 @@ describe("Admin login", () => {
 		expect(response.statusCode).toBe(401);
 		expect(response.body).toContain("Invalid email or password.");
 		expect(response.cookies).toHaveLength(0);
+	});
+
+	it("should keep the next path in the login form", async () => {
+		const response = await app.inject({
+			method: "GET",
+			url: "/admin/login?next=%2Fadmin%2Fjokes%2Fnew",
+		});
+
+		expect(response.body).toContain(
+			'<input type="hidden" name="next" value="/admin/jokes/new">',
+		);
+	});
+
+	it("should return to the requested page after login", async () => {
+		const email = await createTestAdmin();
+
+		const response = await postForm("/admin/login", {
+			email,
+			password: TEST_PASSWORD,
+			next: "/admin/jokes/new",
+		});
+
+		expect(response.headers.location).toBe("/admin/jokes/new");
+	});
+
+	it.each([
+		"https://evil.example",
+		"//evil.example",
+		"/api/jokes",
+	])("should ignore the unsafe next path %s", async (next) => {
+		const email = await createTestAdmin();
+
+		const response = await postForm("/admin/login", {
+			email,
+			password: TEST_PASSWORD,
+			next,
+		});
+
+		expect(response.headers.location).toBe("/admin/jokes");
 	});
 });

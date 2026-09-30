@@ -23,7 +23,9 @@ describe("Admin logout", () => {
 			headers: { cookie },
 		});
 		expect(afterLogout.statusCode).toBe(302);
-		expect(afterLogout.headers.location).toBe("/admin/login");
+		expect(afterLogout.headers.location).toBe(
+			"/admin/login?next=%2Fadmin%2Fjokes",
+		);
 	});
 
 	it("should show the logged out message on the login page", async () => {

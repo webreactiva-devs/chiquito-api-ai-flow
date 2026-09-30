@@ -1,6 +1,7 @@
 import type { FastifyPluginAsync } from "fastify";
 import { deleteSession, findAdminByEmail } from "../../db/admin-queries.js";
 import { normalizeEmail } from "../email.js";
+import { resolveNextPath } from "../next-path.js";
 import { verifyPassword } from "../password.js";
 import type { AdminPluginOptions } from "../plugin.js";
 import { SESSION_COOKIE, startSession } from "../sessions.js";
@@ -8,6 +9,7 @@ import { SESSION_COOKIE, startSession } from "../sessions.js";
 interface LoginBody {
 	email: string;
 	password: string;
+	next?: string;
 }
 
 const LOGIN_NOTICES = new Map([
@@ -21,6 +23,7 @@ const loginBodySchema = {
 	properties: {
 		email: { type: "string" },
 		password: { type: "string" },
+		next: { type: "string" },
 	},
 };
 
@@ -28,10 +31,13 @@ export const sessionRoutes: FastifyPluginAsync<AdminPluginOptions> = async (
 	app,
 	{ db },
 ) => {
-	app.get<{ Querystring: { state?: string } }>("/login", (request, reply) =>
-		reply.view("login.eta", {
-			notice: LOGIN_NOTICES.get(request.query.state ?? ""),
-		}),
+	app.get<{ Querystring: { state?: string; next?: string } }>(
+		"/login",
+		(request, reply) =>
+			reply.view("login.eta", {
+				notice: LOGIN_NOTICES.get(request.query.state ?? ""),
+				next: request.query.next,
+			}),
 	);
 
 	app.post<{ Body: LoginBody }>(
@@ -44,9 +50,11 @@ export const sessionRoutes: FastifyPluginAsync<AdminPluginOptions> = async (
 				(await verifyPassword(request.body.password, admin.passwordHash));
 
 			if (!admin || !isValid) {
-				return reply
-					.status(401)
-					.view("login.eta", { error: "Invalid email or password." });
+				return reply.status(401).view("login.eta", {
+					error: "Invalid email or password.",
+					email: request.body.email,
+					next: request.body.next,
+				});
 			}
 
 			reply.setCookie(SESSION_COOKIE, startSession(db, admin.id, new Date()), {
@@ -54,7 +62,7 @@ export const sessionRoutes: FastifyPluginAsync<AdminPluginOptions> = async (
 				sameSite: "lax",
 				path: "/admin",
 			});
-			return reply.redirect("/admin/jokes");
+			return reply.redirect(resolveNextPath(request.body.next));
 		},
 	);
 };
