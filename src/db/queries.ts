@@ -4,6 +4,7 @@ import type {
 	GlobalStats,
 	Joke,
 	JokeWithStats,
+	NewJoke,
 	VoteResult,
 	VoteType,
 } from "../types/index.js";
@@ -54,6 +55,13 @@ export const insertJoke = (db: Database.Database, joke: Joke): void => {
 	db.prepare(
 		"INSERT INTO jokes (id, type, content, category) VALUES (?, ?, ?, ?)",
 	).run(joke.id, joke.type, joke.content, joke.category);
+};
+
+export const createJoke = (db: Database.Database, joke: NewJoke): number => {
+	const result = db
+		.prepare("INSERT INTO jokes (type, content, category) VALUES (?, ?, ?)")
+		.run(joke.type, joke.content, joke.category);
+	return Number(result.lastInsertRowid);
 };
 
 export const insertJokes = (db: Database.Database, jokes: Joke[]): void => {

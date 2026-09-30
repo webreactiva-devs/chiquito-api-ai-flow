@@ -1,0 +1,20 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title><%= it.title %> · Chiquito Admin</title>
+	<link rel="stylesheet" href="/admin/assets/admin.css">
+</head>
+<body class="min-h-screen">
+	<header class="flex items-center justify-between gap-4 p-4">
+		<a href="/admin/jokes" class="font-bold">Chiquito Admin</a>
+		<% if (it.session) { %>
+		<span><%= it.session.adminEmail %></span>
+		<% } %>
+	</header>
+	<main class="mx-auto max-w-5xl p-4">
+		<%~ it.body %>
+	</main>
+</body>
+</html>

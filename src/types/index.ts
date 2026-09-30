@@ -53,3 +53,18 @@ export interface Admin {
 	passwordHash: string;
 	createdAt: string;
 }
+
+export interface NewJoke {
+	type: string;
+	content: string;
+	category: string;
+}
+
+export interface AdminSession {
+	id: string;
+	adminId: number;
+	adminEmail: string;
+	csrfToken: string;
+	createdAt: string;
+	expiresAt: string;
+}

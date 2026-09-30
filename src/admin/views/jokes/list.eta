@@ -1,0 +1,22 @@
+<% layout("/layout", { title: "Jokes", session: it.session }) %>
+<h1 class="text-2xl font-bold">Jokes</h1>
+<table>
+	<thead>
+		<tr>
+			<th scope="col">ID</th>
+			<th scope="col">Type</th>
+			<th scope="col">Content</th>
+			<th scope="col">Category</th>
+		</tr>
+	</thead>
+	<tbody>
+		<% it.jokes.forEach((joke) => { %>
+		<tr>
+			<td><%= joke.id %></td>
+			<td><%= joke.type %></td>
+			<td><%= joke.content %></td>
+			<td><%= joke.category %></td>
+		</tr>
+		<% }) %>
+	</tbody>
+</table>
