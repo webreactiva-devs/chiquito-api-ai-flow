@@ -85,3 +85,17 @@ export const deleteAdminByEmail = (
 		db.prepare("DELETE FROM admins WHERE email = ?").run(email).changes > 0
 	);
 };
+
+export const changeAdminPassword = (
+	db: Database.Database,
+	adminId: number,
+	passwordHash: string,
+): void => {
+	db.transaction(() => {
+		db.prepare("UPDATE admins SET password_hash = ? WHERE id = ?").run(
+			passwordHash,
+			adminId,
+		);
+		db.prepare("DELETE FROM sessions WHERE admin_id = ?").run(adminId);
+	})();
+};

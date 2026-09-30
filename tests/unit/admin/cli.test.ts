@@ -1,6 +1,6 @@
 import type Database from "better-sqlite3";
 import { beforeEach, describe, expect, it } from "vitest";
-import { verifyPassword } from "../../../src/admin/password.js";
+import { hashPassword, verifyPassword } from "../../../src/admin/password.js";
 import { startSession } from "../../../src/admin/sessions.js";
 import { runAdminCommand } from "../../../src/cli/admin.js";
 import {
@@ -182,6 +182,64 @@ describe("admin CLI", () => {
 
 			const exitCode = await runAdminCommand(
 				["delete", "--email", "ghost@example.com"],
+				io,
+				db,
+			);
+
+			expect(exitCode).toBe(1);
+			expect(io.errors()).toContain("No admin with email ghost@example.com");
+		});
+	});
+
+	describe("password", () => {
+		it("should change the password and close the sessions", async () => {
+			const adminId = createAdmin(
+				db,
+				"ana@example.com",
+				await hashPassword("an-old-password-1"),
+			);
+			startSession(db, adminId, new Date());
+			const io = createFakeIo("a-new-password-1\n");
+
+			const exitCode = await runAdminCommand(
+				["password", "--email", "ana@example.com", "--password-stdin"],
+				io,
+				db,
+			);
+
+			expect(exitCode).toBe(0);
+			const passwordHash =
+				findAdminByEmail(db, "ana@example.com")?.passwordHash ?? "";
+			expect(await verifyPassword("a-new-password-1", passwordHash)).toBe(true);
+			expect(await verifyPassword("an-old-password-1", passwordHash)).toBe(
+				false,
+			);
+			expect(
+				db.prepare("SELECT COUNT(*) as count FROM sessions").get(),
+			).toEqual({ count: 0 });
+		});
+
+		it("should keep the old password when the new one is too short", async () => {
+			createAdmin(db, "ana@example.com", "old-hash");
+			const io = createFakeIo("short\n");
+
+			const exitCode = await runAdminCommand(
+				["password", "--email", "ana@example.com", "--password-stdin"],
+				io,
+				db,
+			);
+
+			expect(exitCode).toBe(1);
+			expect(findAdminByEmail(db, "ana@example.com")?.passwordHash).toBe(
+				"old-hash",
+			);
+		});
+
+		it("should fail for an unknown email", async () => {
+			const io = createFakeIo("a-new-password-1\n");
+
+			const exitCode = await runAdminCommand(
+				["password", "--email", "ghost@example.com", "--password-stdin"],
 				io,
 				db,
 			);

@@ -4,6 +4,7 @@ import type Database from "better-sqlite3";
 import { normalizeEmail } from "../admin/email.js";
 import { findPasswordProblem, hashPassword } from "../admin/password.js";
 import {
+	changeAdminPassword,
 	createAdmin,
 	deleteAdminByEmail,
 	findAdminByEmail,
@@ -18,7 +19,14 @@ export interface CommandIo {
 	readHiddenLine: (prompt: string) => Promise<string>;
 }
 
+interface CommandOptions {
+	email?: string;
+	"password-stdin"?: boolean;
+}
+
 type ExitCode = 0 | 1;
+
+class CommandFailure extends Error {}
 
 const readFirstLine = async (
 	stream: NodeJS.ReadableStream,
@@ -30,88 +38,102 @@ const readFirstLine = async (
 	return text.split(/\r?\n/)[0];
 };
 
-const readNewPassword = async (
-	usesStdin: boolean,
-	io: CommandIo,
-): Promise<string | undefined> => {
-	if (usesStdin) {
-		return readFirstLine(io.stdin);
-	}
+const askForNewPassword = async (io: CommandIo): Promise<string> => {
 	if (!io.isInteractive) {
-		io.stderr.write(
-			"No interactive terminal. Use --password-stdin to give the password.\n",
+		throw new CommandFailure(
+			"No interactive terminal. Use --password-stdin to give the password.",
 		);
-		return undefined;
 	}
 	const password = await io.readHiddenLine("Password: ");
 	const confirmation = await io.readHiddenLine("Repeat the password: ");
 	if (password !== confirmation) {
-		io.stderr.write("The passwords do not match.\n");
-		return undefined;
+		throw new CommandFailure("The passwords do not match.");
 	}
 	return password;
 };
 
-const createAdminCommand = async (
-	options: { email?: string; "password-stdin"?: boolean },
+const readNewPasswordHash = async (
+	options: CommandOptions,
 	io: CommandIo,
-	db: Database.Database,
-): Promise<ExitCode> => {
-	if (!options.email) {
-		io.stderr.write("Missing --email, fistro.\n");
-		return 1;
-	}
-
-	const email = normalizeEmail(options.email);
-	if (findAdminByEmail(db, email)) {
-		io.stderr.write(`An admin with email ${email} already exists.\n`);
-		return 1;
-	}
-	const password = await readNewPassword(
-		options["password-stdin"] === true,
-		io,
-	);
-	if (password === undefined) {
-		return 1;
-	}
+): Promise<string> => {
+	const password = options["password-stdin"]
+		? await readFirstLine(io.stdin)
+		: await askForNewPassword(io);
 	const passwordProblem = findPasswordProblem(password);
 	if (passwordProblem) {
-		io.stderr.write(`${passwordProblem}\n`);
-		return 1;
+		throw new CommandFailure(passwordProblem);
 	}
-	const id = createAdmin(db, email, await hashPassword(password));
-	io.stdout.write(`Admin created: ${email} (id ${id})\n`);
-	return 0;
+	return hashPassword(password);
 };
 
-const deleteAdminCommand = (
-	options: { email?: string },
+const requireEmail = (options: CommandOptions): string => {
+	if (!options.email) {
+		throw new CommandFailure("Missing --email, fistro.");
+	}
+	return normalizeEmail(options.email);
+};
+
+const createAdminCommand = async (
+	options: CommandOptions,
 	io: CommandIo,
 	db: Database.Database,
-): ExitCode => {
-	if (!options.email) {
-		io.stderr.write("Missing --email, fistro.\n");
-		return 1;
+): Promise<void> => {
+	const email = requireEmail(options);
+	if (findAdminByEmail(db, email)) {
+		throw new CommandFailure(`An admin with email ${email} already exists.`);
 	}
-	const email = normalizeEmail(options.email);
-	if (!deleteAdminByEmail(db, email)) {
-		io.stderr.write(`No admin with email ${email}.\n`);
-		return 1;
-	}
-	io.stdout.write(`Admin deleted: ${email}. Their sessions are closed.\n`);
-	return 0;
+	const id = createAdmin(db, email, await readNewPasswordHash(options, io));
+	io.stdout.write(`Admin created: ${email} (id ${id})\n`);
 };
 
-const listAdminsCommand = (io: CommandIo, db: Database.Database): ExitCode => {
+const listAdminsCommand = (io: CommandIo, db: Database.Database): void => {
 	const admins = listAdmins(db);
 	if (admins.length === 0) {
 		io.stdout.write("No admins yet.\n");
-		return 0;
 	}
 	for (const { id, email, createdAt } of admins) {
 		io.stdout.write(`${id}\t${email}\t${createdAt}\n`);
 	}
-	return 0;
+};
+
+const deleteAdminCommand = (
+	options: CommandOptions,
+	io: CommandIo,
+	db: Database.Database,
+): void => {
+	const email = requireEmail(options);
+	if (!deleteAdminByEmail(db, email)) {
+		throw new CommandFailure(`No admin with email ${email}.`);
+	}
+	io.stdout.write(`Admin deleted: ${email}. Their sessions are closed.\n`);
+};
+
+const changePasswordCommand = async (
+	options: CommandOptions,
+	io: CommandIo,
+	db: Database.Database,
+): Promise<void> => {
+	const email = requireEmail(options);
+	const admin = findAdminByEmail(db, email);
+	if (!admin) {
+		throw new CommandFailure(`No admin with email ${email}.`);
+	}
+	changeAdminPassword(db, admin.id, await readNewPasswordHash(options, io));
+	io.stdout.write(`Password changed: ${email}. Their sessions are closed.\n`);
+};
+
+const COMMANDS: Record<
+	string,
+	(
+		options: CommandOptions,
+		io: CommandIo,
+		db: Database.Database,
+	) => void | Promise<void>
+> = {
+	create: createAdminCommand,
+	list: (_options, io, db) => listAdminsCommand(io, db),
+	delete: deleteAdminCommand,
+	password: changePasswordCommand,
 };
 
 export const runAdminCommand = async (
@@ -128,16 +150,22 @@ export const runAdminCommand = async (
 		},
 	});
 
-	if (positionals[0] === "create") {
-		return createAdminCommand(values, io, db);
-	}
-	if (positionals[0] === "list") {
-		return listAdminsCommand(io, db);
-	}
-	if (positionals[0] === "delete") {
-		return deleteAdminCommand(values, io, db);
+	const command = Object.hasOwn(COMMANDS, positionals[0] ?? "")
+		? COMMANDS[positionals[0]]
+		: undefined;
+	if (!command) {
+		io.stderr.write("Usage: admin <create|list|delete|password> [options]\n");
+		return 1;
 	}
 
-	io.stderr.write("Usage: admin <create|list|delete> [options]\n");
-	return 1;
+	try {
+		await command(values, io, db);
+		return 0;
+	} catch (error) {
+		if (error instanceof CommandFailure) {
+			io.stderr.write(`${error.message}\n`);
+			return 1;
+		}
+		throw error;
+	}
 };

@@ -24,4 +24,19 @@ describe("Admin CLI and open sessions", () => {
 		expect(response.statusCode).toBe(302);
 		expect(response.headers.location).toContain("/admin/login");
 	});
+
+	it("should close the sessions and accept only the new password after a change", async () => {
+		const email = await createTestAdmin();
+		const { cookie } = sessionFromLogin(await logIn(email));
+
+		await runAdminCommand(
+			["password", "--email", email, "--password-stdin"],
+			createFakeIo("a-new-password-1\n"),
+			db,
+		);
+
+		expect((await openJokeList(cookie)).statusCode).toBe(302);
+		expect((await logIn(email)).statusCode).toBe(401);
+		expect((await logIn(email, "a-new-password-1")).statusCode).toBe(302);
+	});
 });
