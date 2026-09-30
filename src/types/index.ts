@@ -77,4 +77,5 @@ export interface JokeWithActivity extends Joke {
 
 export interface JokeListFilters {
 	category?: string;
+	search?: string;
 }

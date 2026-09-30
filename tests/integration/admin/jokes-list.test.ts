@@ -107,4 +107,49 @@ describe("Admin joke list", () => {
 		);
 		expect(response.body).toContain('<option value="clásico" selected>');
 	});
+
+	const listUrl = (query: Record<string, string>) =>
+		`/admin/jokes?${new URLSearchParams(query)}`;
+
+	it("should filter by category and search together", async () => {
+		const response = await app.inject({
+			method: "GET",
+			url: listUrl({ category: "clásico", q: "fistro" }),
+			headers: { cookie },
+		});
+
+		expect(response.body).toContain("¡Fistro duodenal!");
+		expect(response.body).toContain("¡Eres un fistro de bambino!");
+		expect(response.body).not.toContain("¡Hasta luego, Lucas!");
+		expect(response.body).toContain('<option value="clásico" selected>');
+		expect(response.body).toContain(
+			'name="q" placeholder="Search content…" value="fistro"',
+		);
+	});
+
+	it("should search with accented capital letters", async () => {
+		createJoke(db, {
+			type: "joke",
+			category: "absurdo",
+			content: "¿Cuándo es él?",
+		});
+
+		const response = await app.inject({
+			method: "GET",
+			url: listUrl({ q: "ÉL" }),
+			headers: { cookie },
+		});
+
+		expect(response.body).toContain("¿Cuándo es él?");
+	});
+
+	it.each(["%", "_"])("should find nothing for the wildcard %s", async (q) => {
+		const response = await app.inject({
+			method: "GET",
+			url: listUrl({ q }),
+			headers: { cookie },
+		});
+
+		expect(response.body).not.toContain("/edit");
+	});
 });

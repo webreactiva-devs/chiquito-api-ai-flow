@@ -74,10 +74,13 @@ export const jokeRoutes: FastifyPluginAsync<AdminPluginOptions> = async (
 
 	app.get("/", (_request, reply) => reply.redirect("/admin/jokes"));
 
-	app.get<{ Querystring: { notice?: string; category?: string } }>(
+	app.get<{ Querystring: { notice?: string; category?: string; q?: string } }>(
 		"/jokes",
 		(request, reply) => {
-			const filters = { category: request.query.category ?? "" };
+			const filters = {
+				category: request.query.category ?? "",
+				search: request.query.q ?? "",
+			};
 			return reply.view("jokes/list.eta", {
 				session: request.adminSession,
 				notice: LIST_NOTICES.get(request.query.notice ?? ""),

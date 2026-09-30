@@ -23,6 +23,10 @@
 			<% }) %>
 		</select>
 	</div>
+	<div class="flex-1">
+		<label class="label" for="q">Search</label>
+		<input class="field" type="search" id="q" name="q" placeholder="Search content…" value="<%= it.filters.search %>">
+	</div>
 	<button type="submit" class="btn btn-navy">Filter</button>
 </form>
 <div class="card overflow-hidden">

@@ -10,6 +10,7 @@ import type {
 	VoteResult,
 	VoteType,
 } from "../types/index.js";
+import { escapeLikePattern } from "./functions.js";
 
 export const getAllJokes = (db: Database.Database): Joke[] => {
 	return db
@@ -246,13 +247,17 @@ export const deleteJokeWithVotesAndStats = (
 
 export const listJokesWithActivity = (
 	db: Database.Database,
-	{ category }: JokeListFilters = {},
+	{ category, search }: JokeListFilters = {},
 ): JokeWithActivity[] => {
 	const conditions: string[] = [];
 	const parameters: string[] = [];
 	if (category) {
 		conditions.push("j.category = ?");
 		parameters.push(category);
+	}
+	if (search) {
+		conditions.push("lower_text(j.content) LIKE ? ESCAPE '\\'");
+		parameters.push(`%${escapeLikePattern(search.toLowerCase())}%`);
 	}
 	const where = conditions.length ? `WHERE ${conditions.join(" AND ")}` : "";
 
