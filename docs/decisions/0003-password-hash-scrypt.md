@@ -10,7 +10,7 @@ Admin passwords must be stored as hashes. Options: scrypt (built into Node), arg
 
 ## Decision
 
-Use the asynchronous `scrypt` from `node:crypto` with a random 16-byte salt. Store the parameters in the hash string (`scrypt$N$r$p$salt$hash`). Compare with `timingSafeEqual`. Passwords have 12 to 128 characters and no composition rules (NIST 800-63B).
+Use the asynchronous `scrypt` from `node:crypto` with a random 16-byte salt. Use the OWASP parameters `N=2^14`, `r=8`, `p=5` (16 MiB of memory for each hash) and a 64-byte key. Store the parameters in the hash string (`scrypt$N$r$p$salt$hash`, salt and key in base64). Compare with `timingSafeEqual`. Passwords have 12 to 128 characters and no composition rules (NIST 800-63B).
 
 ## Consequences
 
