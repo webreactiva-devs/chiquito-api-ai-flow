@@ -1,5 +1,8 @@
 <% layout("/layout", { title: "Log in" }) %>
 <h1 class="text-2xl font-bold">Log in</h1>
+<% if (it.notice) { %>
+<p role="status"><%= it.notice %></p>
+<% } %>
 <% if (it.error) { %>
 <p role="alert"><%= it.error %></p>
 <% } %>

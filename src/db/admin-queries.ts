@@ -53,3 +53,7 @@ export const findSessionById = (
   `)
 		.get(id) as AdminSession | undefined;
 };
+
+export const deleteSession = (db: Database.Database, id: string): void => {
+	db.prepare("DELETE FROM sessions WHERE id = ?").run(id);
+};

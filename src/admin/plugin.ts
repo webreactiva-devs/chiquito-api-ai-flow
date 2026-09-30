@@ -7,7 +7,7 @@ import type Database from "better-sqlite3";
 import { Eta } from "eta";
 import type { FastifyPluginAsync } from "fastify";
 import { jokeRoutes } from "./routes/joke-routes.js";
-import { sessionRoutes } from "./routes/session-routes.js";
+import { logoutRoutes, sessionRoutes } from "./routes/session-routes.js";
 import { requireSession } from "./sessions.js";
 
 export interface AdminPluginOptions {
@@ -23,6 +23,7 @@ const protectedRoutes: FastifyPluginAsync<AdminPluginOptions> = async (
 ) => {
 	app.decorateRequest("adminSession");
 	app.addHook("onRequest", requireSession(db));
+	await app.register(logoutRoutes, { db });
 	await app.register(jokeRoutes, { db });
 };
 

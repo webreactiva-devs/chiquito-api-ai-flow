@@ -10,7 +10,13 @@
 	<header class="flex items-center justify-between gap-4 p-4">
 		<a href="/admin/jokes" class="font-bold">Chiquito Admin</a>
 		<% if (it.session) { %>
-		<span><%= it.session.adminEmail %></span>
+		<div class="flex items-center gap-3">
+			<span><%= it.session.adminEmail %></span>
+			<form method="post" action="/admin/logout">
+				<input type="hidden" name="_csrf" value="<%= it.session.csrfToken %>">
+				<button type="submit">Log out</button>
+			</form>
+		</div>
 		<% } %>
 	</header>
 	<main class="mx-auto max-w-5xl p-4">

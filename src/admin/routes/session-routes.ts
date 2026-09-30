@@ -1,5 +1,5 @@
 import type { FastifyPluginAsync } from "fastify";
-import { findAdminByEmail } from "../../db/admin-queries.js";
+import { deleteSession, findAdminByEmail } from "../../db/admin-queries.js";
 import { normalizeEmail } from "../email.js";
 import { verifyPassword } from "../password.js";
 import type { AdminPluginOptions } from "../plugin.js";
@@ -9,6 +9,10 @@ interface LoginBody {
 	email: string;
 	password: string;
 }
+
+const LOGIN_NOTICES = new Map([
+	["loggedout", "You logged out. Hasta luego, Lucas!"],
+]);
 
 const loginBodySchema = {
 	type: "object",
@@ -23,7 +27,11 @@ export const sessionRoutes: FastifyPluginAsync<AdminPluginOptions> = async (
 	app,
 	{ db },
 ) => {
-	app.get("/login", (_request, reply) => reply.view("login.eta", {}));
+	app.get<{ Querystring: { state?: string } }>("/login", (request, reply) =>
+		reply.view("login.eta", {
+			notice: LOGIN_NOTICES.get(request.query.state ?? ""),
+		}),
+	);
 
 	app.post<{ Body: LoginBody }>(
 		"/login",
@@ -48,4 +56,15 @@ export const sessionRoutes: FastifyPluginAsync<AdminPluginOptions> = async (
 			return reply.redirect("/admin/jokes");
 		},
 	);
+};
+
+export const logoutRoutes: FastifyPluginAsync<AdminPluginOptions> = async (
+	app,
+	{ db },
+) => {
+	app.post("/logout", (request, reply) => {
+		deleteSession(db, request.adminSession.id);
+		reply.clearCookie(SESSION_COOKIE, { path: "/admin" });
+		return reply.redirect("/admin/login?state=loggedout");
+	});
 };
