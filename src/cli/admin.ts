@@ -10,6 +10,7 @@ export interface CommandIo {
 	stdout: Writable;
 	stderr: Writable;
 	isInteractive: boolean;
+	readHiddenLine: (prompt: string) => Promise<string>;
 }
 
 type ExitCode = 0 | 1;
@@ -24,6 +25,28 @@ const readFirstLine = async (
 	return text.split(/\r?\n/)[0];
 };
 
+const readNewPassword = async (
+	usesStdin: boolean,
+	io: CommandIo,
+): Promise<string | undefined> => {
+	if (usesStdin) {
+		return readFirstLine(io.stdin);
+	}
+	if (!io.isInteractive) {
+		io.stderr.write(
+			"No interactive terminal. Use --password-stdin to give the password.\n",
+		);
+		return undefined;
+	}
+	const password = await io.readHiddenLine("Password: ");
+	const confirmation = await io.readHiddenLine("Repeat the password: ");
+	if (password !== confirmation) {
+		io.stderr.write("The passwords do not match.\n");
+		return undefined;
+	}
+	return password;
+};
+
 const createAdminCommand = async (
 	options: { email?: string; "password-stdin"?: boolean },
 	io: CommandIo,
@@ -33,17 +56,19 @@ const createAdminCommand = async (
 		io.stderr.write("Missing --email, fistro.\n");
 		return 1;
 	}
-	if (!options["password-stdin"]) {
-		io.stderr.write("Use --password-stdin to give the password.\n");
-		return 1;
-	}
 
 	const email = normalizeEmail(options.email);
 	if (findAdminByEmail(db, email)) {
 		io.stderr.write(`An admin with email ${email} already exists.\n`);
 		return 1;
 	}
-	const password = await readFirstLine(io.stdin);
+	const password = await readNewPassword(
+		options["password-stdin"] === true,
+		io,
+	);
+	if (password === undefined) {
+		return 1;
+	}
 	const passwordProblem = findPasswordProblem(password);
 	if (passwordProblem) {
 		io.stderr.write(`${passwordProblem}\n`);

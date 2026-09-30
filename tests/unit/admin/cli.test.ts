@@ -68,6 +68,54 @@ describe("admin CLI", () => {
 			});
 		});
 
+		it("should ask for the password two times in a terminal", async () => {
+			const io = createFakeIo("", {
+				isInteractive: true,
+				hiddenAnswers: ["a-long-password-1", "a-long-password-1"],
+			});
+
+			const exitCode = await runAdminCommand(
+				["create", "--email", "bea@example.com"],
+				io,
+				db,
+			);
+
+			expect(exitCode).toBe(0);
+			expect(io.output()).toContain("Password: Repeat the password: ");
+			expect(findAdminByEmail(db, "bea@example.com")).toBeDefined();
+		});
+
+		it("should refuse two different passwords", async () => {
+			const io = createFakeIo("", {
+				isInteractive: true,
+				hiddenAnswers: ["a-long-password-1", "a-long-password-2"],
+			});
+
+			const exitCode = await runAdminCommand(
+				["create", "--email", "bea@example.com"],
+				io,
+				db,
+			);
+
+			expect(exitCode).toBe(1);
+			expect(io.errors()).toContain("The passwords do not match.");
+			expect(findAdminByEmail(db, "bea@example.com")).toBeUndefined();
+		});
+
+		it("should ask for --password-stdin without a terminal", async () => {
+			const io = createFakeIo("a-long-password-1\n");
+
+			const exitCode = await runAdminCommand(
+				["create", "--email", "bea@example.com"],
+				io,
+				db,
+			);
+
+			expect(exitCode).toBe(1);
+			expect(io.errors()).toContain("Use --password-stdin");
+			expect(findAdminByEmail(db, "bea@example.com")).toBeUndefined();
+		});
+
 		it("should fail without an email", async () => {
 			const io = createFakeIo("a-long-password-1\n");
 

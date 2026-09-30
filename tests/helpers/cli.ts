@@ -16,8 +16,12 @@ const collect = (stream: PassThrough): (() => string) => {
 
 export const createFakeIo = (
 	input: string,
-	{ isInteractive = false } = {},
+	{
+		isInteractive = false,
+		hiddenAnswers = [] as string[],
+	}: { isInteractive?: boolean; hiddenAnswers?: string[] } = {},
 ): FakeIo => {
+	const answers = [...hiddenAnswers];
 	const stdout = new PassThrough();
 	const stderr = new PassThrough();
 	return {
@@ -25,6 +29,10 @@ export const createFakeIo = (
 		stdout,
 		stderr,
 		isInteractive,
+		readHiddenLine: async (prompt) => {
+			stdout.write(prompt);
+			return answers.shift() ?? "";
+		},
 		output: collect(stdout),
 		errors: collect(stderr),
 	};
