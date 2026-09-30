@@ -18,7 +18,8 @@
     "check": "biome check src tests",
     "admin:create": "tsx src/cli/admin-main.ts create",
     "build:css": "npm run build:fonts && tailwindcss -i src/admin/styles/input.css -o public/admin/admin.css --minify",
-    "build:fonts": "mkdir -p public/admin/fonts && cp node_modules/@fontsource/bungee/files/bungee-latin-400-normal.woff2 node_modules/@fontsource-variable/rubik/files/rubik-latin-wght-normal.woff2 public/admin/fonts/"
+    "build:fonts": "mkdir -p public/admin/fonts && cp node_modules/@fontsource/bungee/files/bungee-latin-400-normal.woff2 node_modules/@fontsource-variable/rubik/files/rubik-latin-wght-normal.woff2 public/admin/fonts/",
+    "admin:list": "tsx src/cli/admin-main.ts list"
   },
   "dependencies": {
     "@fastify/cookie": "^11.1.2",

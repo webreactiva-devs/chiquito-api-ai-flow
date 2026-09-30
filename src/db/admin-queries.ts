@@ -66,3 +66,13 @@ export const deleteExpiredSessions = (
 		now.toISOString(),
 	);
 };
+
+export const listAdmins = (
+	db: Database.Database,
+): Omit<Admin, "passwordHash">[] => {
+	return db
+		.prepare(
+			"SELECT id, email, created_at as createdAt FROM admins ORDER BY id",
+		)
+		.all() as Omit<Admin, "passwordHash">[];
+};

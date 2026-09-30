@@ -2,7 +2,10 @@ import type Database from "better-sqlite3";
 import { beforeEach, describe, expect, it } from "vitest";
 import { verifyPassword } from "../../../src/admin/password.js";
 import { runAdminCommand } from "../../../src/cli/admin.js";
-import { findAdminByEmail } from "../../../src/db/admin-queries.js";
+import {
+	createAdmin,
+	findAdminByEmail,
+} from "../../../src/db/admin-queries.js";
 import { createFakeIo } from "../../helpers/cli.js";
 import { createTestDatabase } from "../../helpers/database.js";
 
@@ -127,6 +130,30 @@ describe("admin CLI", () => {
 
 			expect(exitCode).toBe(1);
 			expect(io.errors()).toContain("--email");
+		});
+	});
+
+	describe("list", () => {
+		it("should say that there are no admins", async () => {
+			const io = createFakeIo("");
+
+			expect(await runAdminCommand(["list"], io, db)).toBe(0);
+
+			expect(io.output()).toBe("No admins yet.\n");
+		});
+
+		it("should print the id, email and creation date without hashes", async () => {
+			createAdmin(db, "ana@example.com", "scrypt$secret-hash");
+			createAdmin(db, "bea@example.com", "scrypt$other-hash");
+			const io = createFakeIo("");
+
+			expect(await runAdminCommand(["list"], io, db)).toBe(0);
+
+			const lines = io.output().trim().split("\n");
+			expect(lines).toHaveLength(2);
+			expect(lines[0]).toMatch(/^1\tana@example\.com\t\d{4}-\d{2}-\d{2} /);
+			expect(lines[1]).toMatch(/^2\tbea@example\.com\t/);
+			expect(io.output()).not.toContain("hash");
 		});
 	});
 

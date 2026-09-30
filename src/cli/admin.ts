@@ -3,7 +3,11 @@ import { parseArgs } from "node:util";
 import type Database from "better-sqlite3";
 import { normalizeEmail } from "../admin/email.js";
 import { findPasswordProblem, hashPassword } from "../admin/password.js";
-import { createAdmin, findAdminByEmail } from "../db/admin-queries.js";
+import {
+	createAdmin,
+	findAdminByEmail,
+	listAdmins,
+} from "../db/admin-queries.js";
 
 export interface CommandIo {
 	stdin: NodeJS.ReadableStream;
@@ -79,6 +83,18 @@ const createAdminCommand = async (
 	return 0;
 };
 
+const listAdminsCommand = (io: CommandIo, db: Database.Database): ExitCode => {
+	const admins = listAdmins(db);
+	if (admins.length === 0) {
+		io.stdout.write("No admins yet.\n");
+		return 0;
+	}
+	for (const { id, email, createdAt } of admins) {
+		io.stdout.write(`${id}\t${email}\t${createdAt}\n`);
+	}
+	return 0;
+};
+
 export const runAdminCommand = async (
 	args: string[],
 	io: CommandIo,
@@ -96,7 +112,10 @@ export const runAdminCommand = async (
 	if (positionals[0] === "create") {
 		return createAdminCommand(values, io, db);
 	}
+	if (positionals[0] === "list") {
+		return listAdminsCommand(io, db);
+	}
 
-	io.stderr.write("Usage: admin <create> [options]\n");
+	io.stderr.write("Usage: admin <create|list> [options]\n");
 	return 1;
 };
