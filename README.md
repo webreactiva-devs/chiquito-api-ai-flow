@@ -27,7 +27,10 @@ cd chiquito-api-flow
 # Install dependencies
 npm install
 
-# Start the development server
+# Create the SQLite database with the seed jokes
+npm run db:init
+
+# Start the development server (it also builds the admin CSS)
 npm run dev
 ```
 
@@ -36,10 +39,57 @@ The API will be running at `http://localhost:3000`
 ## Available Scripts
 
 ```bash
-npm start     # Start production server
-npm run dev   # Start development server with auto-reload
-npm test      # Run test suite
+npm start                  # Start production server (run npm run build first)
+npm run dev                # Start development server with auto-reload
+npm run build              # Build the admin CSS and compile TypeScript
+npm run build:css          # Build the admin CSS and copy the fonts
+npm run db:init            # Seed an empty database
+npm run db:init -- --force # Reset jokes, votes and stats (keeps admins)
+npm test                   # Run test suite
 ```
+
+## Admin Panel
+
+A web panel at `/admin` lets admins list, search, create, edit and delete jokes. Deleting a joke also deletes its votes and views.
+
+### Create the first admin
+
+Admins are managed only with the CLI:
+
+```bash
+npm run admin:create -- --email ana@example.com
+```
+
+The command asks for the password two times and does not show it. A password must have 12 to 128 characters.
+
+Where no interactive terminal exists (Docker, CI, deploy scripts), give the password on standard input:
+
+```bash
+printf '%s\n' "$ADMIN_PASSWORD" | npm run admin:create -- --email ana@example.com --password-stdin
+```
+
+### Admin commands
+
+```bash
+npm run admin:create -- --email <email> [--password-stdin]   # Create an admin
+npm run admin:list                                           # List admins (id, email, creation date)
+npm run admin:delete -- --email <email>                      # Delete an admin and close their sessions
+npm run admin:password -- --email <email> [--password-stdin] # Change a password and close all sessions
+```
+
+### Use the panel
+
+1. Run `npm run dev`.
+2. Open `http://localhost:3000/admin`.
+3. Log in with the email and password of an admin.
+
+Sessions end 24 hours after login. The panel does not limit login attempts, but it checks at most 4 passwords at the same time. See [docs/specs/admin-panel.md](docs/specs/admin-panel.md) for the full behavior and [docs/decisions/](docs/decisions/) for the decisions.
+
+### Production
+
+- Run `npm run build` before `npm start`. The admin CSS is generated and is not in git.
+- Serve the panel over HTTPS. The session cookie has the `Secure` attribute. Do not set `COOKIE_SECURE=false` in production.
+- The `/admin` routes return HTML. They are not in the OpenAPI spec.
 
 ## API Endpoints
 
