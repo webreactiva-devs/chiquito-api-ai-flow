@@ -61,3 +61,14 @@ export const verifyPassword = async (
 	);
 	return timingSafeEqual(actualKey, expectedKey);
 };
+
+export const MIN_PASSWORD_LENGTH = 12;
+export const MAX_PASSWORD_LENGTH = 128;
+
+export const findPasswordProblem = (password: string): string | undefined => {
+	const length = [...password].length;
+	if (length < MIN_PASSWORD_LENGTH || length > MAX_PASSWORD_LENGTH) {
+		return `The password must have ${MIN_PASSWORD_LENGTH} to ${MAX_PASSWORD_LENGTH} characters.`;
+	}
+	return undefined;
+};

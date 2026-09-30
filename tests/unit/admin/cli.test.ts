@@ -33,6 +33,20 @@ describe("admin CLI", () => {
 			expect(io.output()).toContain("Admin created: ana@example.com");
 		});
 
+		it("should refuse a short password and create no admin", async () => {
+			const io = createFakeIo("short\n");
+
+			const exitCode = await runAdminCommand(
+				["create", "--email", "ana@example.com", "--password-stdin"],
+				io,
+				db,
+			);
+
+			expect(exitCode).toBe(1);
+			expect(io.errors()).toContain("12 to 128 characters");
+			expect(findAdminByEmail(db, "ana@example.com")).toBeUndefined();
+		});
+
 		it("should fail without an email", async () => {
 			const io = createFakeIo("a-long-password-1\n");
 

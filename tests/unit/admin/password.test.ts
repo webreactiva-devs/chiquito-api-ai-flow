@@ -1,5 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { hashPassword, verifyPassword } from "../../../src/admin/password.js";
+import {
+	findPasswordProblem,
+	hashPassword,
+	verifyPassword,
+} from "../../../src/admin/password.js";
 
 describe("password", () => {
 	it("should not store the password in the hash", async () => {
@@ -26,5 +30,22 @@ describe("password", () => {
 		const second = await hashPassword("a-long-password-1");
 
 		expect(first).not.toBe(second);
+	});
+});
+
+describe("findPasswordProblem", () => {
+	it.each([
+		[11, true],
+		[12, false],
+		[128, false],
+		[129, true],
+	])("should check a password with %i characters", (length, hasProblem) => {
+		expect(findPasswordProblem("a".repeat(length)) !== undefined).toBe(
+			hasProblem,
+		);
+	});
+
+	it("should count an emoji as one character", () => {
+		expect(findPasswordProblem("😂".repeat(12))).toBeUndefined();
 	});
 });

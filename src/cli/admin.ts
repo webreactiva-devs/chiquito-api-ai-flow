@@ -2,7 +2,7 @@ import type { Writable } from "node:stream";
 import { parseArgs } from "node:util";
 import type Database from "better-sqlite3";
 import { normalizeEmail } from "../admin/email.js";
-import { hashPassword } from "../admin/password.js";
+import { findPasswordProblem, hashPassword } from "../admin/password.js";
 import { createAdmin } from "../db/admin-queries.js";
 
 export interface CommandIo {
@@ -40,6 +40,11 @@ const createAdminCommand = async (
 
 	const email = normalizeEmail(options.email);
 	const password = await readFirstLine(io.stdin);
+	const passwordProblem = findPasswordProblem(password);
+	if (passwordProblem) {
+		io.stderr.write(`${passwordProblem}\n`);
+		return 1;
+	}
 	const id = createAdmin(db, email, await hashPassword(password));
 	io.stdout.write(`Admin created: ${email} (id ${id})\n`);
 	return 0;
