@@ -21,3 +21,6 @@ Classification:
 | [0010](0010-unicode-case-insensitive-search.md) | Search joke content with Unicode lowercase | Reversible |
 | [0011](0011-tailwind-cli-local-assets.md) | Build Tailwind CSS with the CLI and serve it locally | Reversible |
 | [0012](0012-admin-panel-conventions.md) | English UI and no OpenAPI entries for the admin panel | Reversible |
+| [0013](0013-count-characters-as-code-points.md) | Count text length in Unicode code points | Reversible |
+| [0014](0014-validate-next-with-url-parsing.md) | Validate the login next path with URL parsing | Reversible |
+| [0015](0015-admin-cli-with-injected-io.md) | Run admin CLI commands with injected input, output and database | Reversible |

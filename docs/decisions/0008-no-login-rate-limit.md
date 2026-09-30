@@ -17,4 +17,5 @@ No rate limit and no account lockout. Allow at most 4 password verifications at 
 - The public API stays available during a login flood.
 - An attacker can still try many passwords, one batch at a time. The 12-character minimum reduces this risk.
 - During an attack, real admins can get `503`.
+- The limit is in the memory of one process. With more than one process or server, each one allows 4.
 - A rate limit can be added later with `@fastify/rate-limit`.

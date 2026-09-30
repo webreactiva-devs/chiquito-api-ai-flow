@@ -422,3 +422,15 @@ Commit: `docs(admin): 📝 document the admin panel and CLI`
 - **Fonts (step 10).** Self-hosted files or Google Fonts. Spec §12 proposes self-hosted.
 - **`dev` script (step 1).** Running `tsx watch` and the Tailwind watcher together needs either a shell `&` (works on macOS and Linux, not on Windows `cmd`) or a new development dependency (for example `concurrently`). Proposal: shell `&`, because the project runs on macOS.
 - **Manual check in a browser.** Spec §12 lists it as optional. The "Test when done" manual checks in this plan are the proposal.
+
+## Implementation notes
+
+The plan was implemented on 2026-09-30. These points are different from the plan:
+
+- **Step 1** stores `expires_at` (login + 24 hours) from the start, because the column is `NOT NULL`. Step 5 adds only the expiry check and the clean-up.
+- **Step 4** runs the CSRF check in the `preValidation` hook, so a form with a wrong token gets `403` before any field validation.
+- **Step 11** adds only the `welcome` and `created` notices. Steps 13 and 14 add `updated` and `deleted` with their routes.
+- **Steps 16 to 27** have numbers one higher than in the first version of this plan, because "Vote and view columns" became its own step.
+- **Step 26** also moves the CLI failures to one `CommandFailure` error (ADR 0015).
+- The `.gitignore` rule `public` (from a Gatsby template) was removed, and Biome now parses Tailwind directives (ADR 0011).
+- New ADRs: 0013 (character counting), 0014 (`next` validation), 0015 (CLI input and output).

@@ -17,3 +17,5 @@ Use `@tailwindcss/cli` v4 to build `public/admin/admin.css` from `src/admin/styl
 - No third-party requests from the panel.
 - `npm run build` (or `build:css`) is necessary before `npm start`.
 - `npm run dev` does not work in Windows `cmd`.
+- The old `public` rule in `.gitignore` (from a Gatsby template) is removed, so that `public/admin/.gitkeep` is in git.
+- Biome parses the Tailwind directives (`css.parser.tailwindDirectives` in `biome.json`).
