@@ -80,6 +80,7 @@ public
 # Temporary folders
 tmp/
 temp/
+.scratchpad/
 
 # Editor directories and files
 .vscode/
