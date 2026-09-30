@@ -6,7 +6,7 @@
     "start": "tsx src/server.ts",
     "dev": "tailwindcss -i src/admin/styles/input.css -o public/admin/admin.css --watch & tsx watch src/server.ts",
     "build": "npm run build:css && tsc",
-    "db:init": "tsx src/db/init.ts",
+    "db:init": "tsx src/db/init-main.ts",
     "test:types": "tsc --noEmit",
     "test:unit": "vitest run tests/unit",
     "test:integration": "vitest run tests/integration",

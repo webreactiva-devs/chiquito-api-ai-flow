@@ -12,7 +12,8 @@ REST API serving Chiquito de la Calzada jokes. TypeScript + Fastify 5 + SQLite (
 npm run dev              # Dev server with auto-reload (tsx watch)
 npm start                # Run server with tsx
 npm run build            # Compile TypeScript to dist/
-npm run db:init          # Initialize/reset SQLite database from data/chiquito.json
+npm run db:init          # Seed an empty SQLite database from data/chiquito.json
+npm run db:init -- --force # Reset jokes, votes and stats (keeps admins and sessions)
 npm test                 # Type check + Biome check + all Vitest tests (same as CI)
 npm run test:types       # tsc --noEmit
 npm run test:unit        # tests/unit
@@ -39,7 +40,7 @@ npx vitest run -t "should return all jokes"
 - `src/db/connection.ts` - Database singleton (WAL, foreign keys on); `getDatabase(":memory:")` for isolated tests.
 - `src/db/schema.ts` - Table definitions (`jokes`, `votes`, `stats`).
 - `src/db/queries.ts` - Typed query functions.
-- `src/db/init.ts` - Seeds the database from `data/chiquito.json`.
+- `src/db/init.ts` - `initializeDatabase`: seeds the database. Refuses a database with jokes unless `force` is set. `src/db/init-main.ts` is the `db:init` entry point.
 - `src/types/index.ts` - Shared interfaces.
 - `spec/openapi.yaml` - OpenAPI spec, served by Swagger UI at `/docs` (disabled when `NODE_ENV=production`).
 

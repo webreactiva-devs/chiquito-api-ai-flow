@@ -3,7 +3,8 @@ import { beforeEach, describe, expect, it } from "vitest";
 import { verifyPassword } from "../../../src/admin/password.js";
 import { runAdminCommand } from "../../../src/cli/admin.js";
 import { findAdminByEmail } from "../../../src/db/admin-queries.js";
-import { createFakeIo, createTestDatabase } from "../../helpers/cli.js";
+import { createFakeIo } from "../../helpers/cli.js";
+import { createTestDatabase } from "../../helpers/database.js";
 
 describe("admin CLI", () => {
 	let db: Database.Database;
