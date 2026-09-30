@@ -1,5 +1,6 @@
 <% layout("/layout", { title: "Jokes", session: it.session }) %>
 <h1 class="text-2xl font-bold">Jokes</h1>
+<a href="/admin/jokes/new">New joke</a>
 <table>
 	<thead>
 		<tr>

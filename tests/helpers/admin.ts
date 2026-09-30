@@ -8,10 +8,20 @@ export const TEST_PASSWORD = "a-long-password-1";
 const testPasswordHash = hashPassword(TEST_PASSWORD);
 let adminCount = 0;
 
-export const formBody = (fields: Record<string, string>) => ({
-	payload: new URLSearchParams(fields).toString(),
-	headers: { "content-type": "application/x-www-form-urlencoded" },
-});
+export const postForm = (
+	url: string,
+	fields: Record<string, string>,
+	cookie?: string,
+) =>
+	app.inject({
+		method: "POST",
+		url,
+		payload: new URLSearchParams(fields).toString(),
+		headers: {
+			"content-type": "application/x-www-form-urlencoded",
+			...(cookie ? { cookie } : {}),
+		},
+	});
 
 export const createTestAdmin = async (
 	email = `admin${++adminCount}@example.com`,
@@ -21,11 +31,7 @@ export const createTestAdmin = async (
 };
 
 export const logIn = (email: string, password = TEST_PASSWORD) =>
-	app.inject({
-		method: "POST",
-		url: "/admin/login",
-		...formBody({ email, password }),
-	});
+	postForm("/admin/login", { email, password });
 
 export const logInAsNewAdmin = async (): Promise<{ cookie: string }> => {
 	const response = await logIn(await createTestAdmin());

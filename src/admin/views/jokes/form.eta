@@ -1,0 +1,18 @@
+<% layout("/layout", { title: "New joke", session: it.session }) %>
+<h1 class="text-2xl font-bold">New joke</h1>
+<form method="post" action="/admin/jokes" class="flex max-w-xl flex-col gap-3">
+	<input type="hidden" name="_csrf" value="<%= it.session.csrfToken %>">
+	<label for="type">Type</label>
+	<select id="type" name="type">
+		<option value="phrase">phrase</option>
+		<option value="joke">joke</option>
+	</select>
+	<label for="category">Category</label>
+	<input id="category" name="category" type="text">
+	<label for="content">Content</label>
+	<textarea id="content" name="content" rows="4"></textarea>
+	<div class="flex gap-3">
+		<button type="submit">Create joke</button>
+		<a href="/admin/jokes">Cancel</a>
+	</div>
+</form>
