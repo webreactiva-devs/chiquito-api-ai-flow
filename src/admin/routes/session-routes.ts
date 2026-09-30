@@ -1,6 +1,7 @@
 import { randomBytes } from "node:crypto";
 import type { FastifyPluginAsync } from "fastify";
 import { deleteSession, findAdminByEmail } from "../../db/admin-queries.js";
+import { createConcurrencyLimiter } from "../concurrency-limiter.js";
 import { normalizeEmail } from "../email.js";
 import { resolveNextPath } from "../next-path.js";
 import { hashPassword, verifyPassword } from "../password.js";
@@ -12,6 +13,8 @@ interface LoginBody {
 	password: string;
 	next?: string;
 }
+
+const MAX_CONCURRENT_PASSWORD_CHECKS = 4;
 
 const LOGIN_NOTICES = new Map([
 	["loggedout", "You logged out. Hasta luego, Lucas!"],
@@ -35,6 +38,9 @@ export const sessionRoutes: FastifyPluginAsync<AdminPluginOptions> = async (
 	const unknownAdminPasswordHash = await hashPassword(
 		randomBytes(32).toString("base64url"),
 	);
+	const limitPasswordChecks = createConcurrencyLimiter(
+		MAX_CONCURRENT_PASSWORD_CHECKS,
+	);
 
 	app.get<{ Querystring: { state?: string; next?: string } }>(
 		"/login",
@@ -49,18 +55,27 @@ export const sessionRoutes: FastifyPluginAsync<AdminPluginOptions> = async (
 		"/login",
 		{ schema: { body: loginBodySchema } },
 		async (request, reply) => {
-			const admin = findAdminByEmail(db, normalizeEmail(request.body.email));
-			const passwordMatches = await verifyPassword(
-				request.body.password,
-				admin?.passwordHash ?? unknownAdminPasswordHash,
+			const { email, password, next } = request.body;
+			const admin = findAdminByEmail(db, normalizeEmail(email));
+			const passwordCheck = await limitPasswordChecks(() =>
+				verifyPassword(
+					password,
+					admin?.passwordHash ?? unknownAdminPasswordHash,
+				),
 			);
-			const isValid = admin !== undefined && passwordMatches;
 
-			if (!admin || !isValid) {
+			if (passwordCheck.busy) {
+				return reply.status(503).view("login.eta", {
+					error: "The server is busy. Try again in a moment.",
+					email,
+					next,
+				});
+			}
+			if (!admin || !passwordCheck.value) {
 				return reply.status(401).view("login.eta", {
 					error: "Invalid email or password.",
-					email: request.body.email,
-					next: request.body.next,
+					email,
+					next,
 				});
 			}
 
@@ -70,7 +85,7 @@ export const sessionRoutes: FastifyPluginAsync<AdminPluginOptions> = async (
 				path: "/admin",
 				secure: secureCookie,
 			});
-			return reply.redirect(resolveNextPath(request.body.next));
+			return reply.redirect(resolveNextPath(next));
 		},
 	);
 };
