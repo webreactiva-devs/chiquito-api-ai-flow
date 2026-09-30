@@ -53,6 +53,7 @@ npx vitest run -t "should return all jokes"
 | `PORT` | `3000` |
 | `DATABASE_PATH` | `data/chiquito.db` |
 | `NODE_ENV` | `production` disables Swagger |
+| `COOKIE_SECURE` | `true`. Set `false` only for local HTTP (`npm run dev` does it) |
 
 ## Code style
 

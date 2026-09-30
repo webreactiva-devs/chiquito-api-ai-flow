@@ -13,6 +13,7 @@ import { requireSession } from "./sessions.js";
 
 export interface AdminPluginOptions {
 	db: Database.Database;
+	secureCookie: boolean;
 }
 
 const viewsDirectory = join(import.meta.dirname, "views");
@@ -20,19 +21,21 @@ const assetsDirectory = join(import.meta.dirname, "../../public/admin");
 
 const protectedRoutes: FastifyPluginAsync<AdminPluginOptions> = async (
 	app,
-	{ db },
+	options,
 ) => {
+	const { db } = options;
 	app.decorateRequest("adminSession");
 	app.addHook("onRequest", requireSession(db));
 	app.addHook("preValidation", requireCsrfToken);
-	await app.register(logoutRoutes, { db });
-	await app.register(jokeRoutes, { db });
+	await app.register(logoutRoutes, options);
+	await app.register(jokeRoutes, options);
 };
 
 export const adminPlugin: FastifyPluginAsync<AdminPluginOptions> = async (
 	app,
-	{ db },
+	{ db, secureCookie },
 ) => {
+	const routeOptions = { db, secureCookie };
 	await app.register(cookie);
 	await app.register(formbody);
 	await app.register(fastifyStatic, {
@@ -43,6 +46,6 @@ export const adminPlugin: FastifyPluginAsync<AdminPluginOptions> = async (
 		engine: { eta: new Eta() },
 		root: viewsDirectory,
 	});
-	await app.register(sessionRoutes, { db });
-	await app.register(protectedRoutes, { db });
+	await app.register(sessionRoutes, routeOptions);
+	await app.register(protectedRoutes, routeOptions);
 };

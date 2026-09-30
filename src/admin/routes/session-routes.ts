@@ -29,7 +29,7 @@ const loginBodySchema = {
 
 export const sessionRoutes: FastifyPluginAsync<AdminPluginOptions> = async (
 	app,
-	{ db },
+	{ db, secureCookie },
 ) => {
 	app.get<{ Querystring: { state?: string; next?: string } }>(
 		"/login",
@@ -61,6 +61,7 @@ export const sessionRoutes: FastifyPluginAsync<AdminPluginOptions> = async (
 				httpOnly: true,
 				sameSite: "lax",
 				path: "/admin",
+				secure: secureCookie,
 			});
 			return reply.redirect(resolveNextPath(request.body.next));
 		},

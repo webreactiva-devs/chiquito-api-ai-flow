@@ -44,7 +44,11 @@ if (!isProduction) {
 	});
 }
 
-await app.register(adminPlugin, { prefix: "/admin", db });
+await app.register(adminPlugin, {
+	prefix: "/admin",
+	db,
+	secureCookie: process.env.COOKIE_SECURE !== "false",
+});
 
 app.get("/api/categories", async () => {
 	try {
