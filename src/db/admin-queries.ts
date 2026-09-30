@@ -76,3 +76,12 @@ export const listAdmins = (
 		)
 		.all() as Omit<Admin, "passwordHash">[];
 };
+
+export const deleteAdminByEmail = (
+	db: Database.Database,
+	email: string,
+): boolean => {
+	return (
+		db.prepare("DELETE FROM admins WHERE email = ?").run(email).changes > 0
+	);
+};

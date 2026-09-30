@@ -1,6 +1,7 @@
 import type Database from "better-sqlite3";
 import { beforeEach, describe, expect, it } from "vitest";
 import { verifyPassword } from "../../../src/admin/password.js";
+import { startSession } from "../../../src/admin/sessions.js";
 import { runAdminCommand } from "../../../src/cli/admin.js";
 import {
 	createAdmin,
@@ -154,6 +155,39 @@ describe("admin CLI", () => {
 			expect(lines[0]).toMatch(/^1\tana@example\.com\t\d{4}-\d{2}-\d{2} /);
 			expect(lines[1]).toMatch(/^2\tbea@example\.com\t/);
 			expect(io.output()).not.toContain("hash");
+		});
+	});
+
+	describe("delete", () => {
+		it("should delete the admin and the sessions", async () => {
+			const adminId = createAdmin(db, "ana@example.com", "hash");
+			startSession(db, adminId, new Date());
+			const io = createFakeIo("");
+
+			const exitCode = await runAdminCommand(
+				["delete", "--email", "Ana@Example.com"],
+				io,
+				db,
+			);
+
+			expect(exitCode).toBe(0);
+			expect(findAdminByEmail(db, "ana@example.com")).toBeUndefined();
+			expect(
+				db.prepare("SELECT COUNT(*) as count FROM sessions").get(),
+			).toEqual({ count: 0 });
+		});
+
+		it("should fail for an unknown email", async () => {
+			const io = createFakeIo("");
+
+			const exitCode = await runAdminCommand(
+				["delete", "--email", "ghost@example.com"],
+				io,
+				db,
+			);
+
+			expect(exitCode).toBe(1);
+			expect(io.errors()).toContain("No admin with email ghost@example.com");
 		});
 	});
 

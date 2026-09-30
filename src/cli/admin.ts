@@ -5,6 +5,7 @@ import { normalizeEmail } from "../admin/email.js";
 import { findPasswordProblem, hashPassword } from "../admin/password.js";
 import {
 	createAdmin,
+	deleteAdminByEmail,
 	findAdminByEmail,
 	listAdmins,
 } from "../db/admin-queries.js";
@@ -83,6 +84,24 @@ const createAdminCommand = async (
 	return 0;
 };
 
+const deleteAdminCommand = (
+	options: { email?: string },
+	io: CommandIo,
+	db: Database.Database,
+): ExitCode => {
+	if (!options.email) {
+		io.stderr.write("Missing --email, fistro.\n");
+		return 1;
+	}
+	const email = normalizeEmail(options.email);
+	if (!deleteAdminByEmail(db, email)) {
+		io.stderr.write(`No admin with email ${email}.\n`);
+		return 1;
+	}
+	io.stdout.write(`Admin deleted: ${email}. Their sessions are closed.\n`);
+	return 0;
+};
+
 const listAdminsCommand = (io: CommandIo, db: Database.Database): ExitCode => {
 	const admins = listAdmins(db);
 	if (admins.length === 0) {
@@ -115,7 +134,10 @@ export const runAdminCommand = async (
 	if (positionals[0] === "list") {
 		return listAdminsCommand(io, db);
 	}
+	if (positionals[0] === "delete") {
+		return deleteAdminCommand(values, io, db);
+	}
 
-	io.stderr.write("Usage: admin <create|list> [options]\n");
+	io.stderr.write("Usage: admin <create|list|delete> [options]\n");
 	return 1;
 };
