@@ -1,18 +1,25 @@
 <% layout("/layout", { title: "New joke", session: it.session }) %>
-<h1 class="text-2xl font-bold">New joke</h1>
-<form method="post" action="/admin/jokes" class="flex max-w-xl flex-col gap-3">
+<a href="/admin/jokes" class="font-bold underline">« Back to the jokes</a>
+<h1 class="mt-4 mb-6 font-display text-3xl leading-none sm:text-4xl">New joke</h1>
+<form method="post" action="/admin/jokes" class="card max-w-2xl space-y-5 p-6 sm:p-8">
 	<input type="hidden" name="_csrf" value="<%= it.session.csrfToken %>">
-	<label for="type">Type</label>
-	<select id="type" name="type">
-		<option value="phrase">phrase</option>
-		<option value="joke">joke</option>
-	</select>
-	<label for="category">Category</label>
-	<input id="category" name="category" type="text">
-	<label for="content">Content</label>
-	<textarea id="content" name="content" rows="4"></textarea>
-	<div class="flex gap-3">
-		<button type="submit">Create joke</button>
-		<a href="/admin/jokes">Cancel</a>
+	<div>
+		<label class="label" for="type">Type</label>
+		<select class="field" id="type" name="type">
+			<option value="phrase">phrase</option>
+			<option value="joke">joke</option>
+		</select>
+	</div>
+	<div>
+		<label class="label" for="category">Category</label>
+		<input class="field" id="category" name="category" type="text">
+	</div>
+	<div>
+		<label class="label" for="content">Content</label>
+		<textarea class="field" id="content" name="content" rows="5"></textarea>
+	</div>
+	<div class="flex flex-wrap gap-3">
+		<button type="submit" class="btn btn-primary">Create joke</button>
+		<a href="/admin/jokes" class="btn btn-plain">Cancel</a>
 	</div>
 </form>

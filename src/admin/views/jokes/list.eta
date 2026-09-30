@@ -1,23 +1,32 @@
 <% layout("/layout", { title: "Jokes", session: it.session }) %>
-<h1 class="text-2xl font-bold">Jokes</h1>
-<a href="/admin/jokes/new">New joke</a>
-<table>
-	<thead>
-		<tr>
-			<th scope="col">ID</th>
-			<th scope="col">Type</th>
-			<th scope="col">Content</th>
-			<th scope="col">Category</th>
-		</tr>
-	</thead>
-	<tbody>
-		<% it.jokes.forEach((joke) => { %>
-		<tr>
-			<td><%= joke.id %></td>
-			<td><%= joke.type %></td>
-			<td><%= joke.content %></td>
-			<td><%= joke.category %></td>
-		</tr>
-		<% }) %>
-	</tbody>
-</table>
+<div class="mb-6 flex flex-wrap items-end justify-between gap-4">
+	<div>
+		<h1 class="font-display text-3xl leading-none sm:text-4xl">Jokes</h1>
+		<p class="mt-2 font-medium">Every phrase and joke served by the API.</p>
+	</div>
+	<a href="/admin/jokes/new" class="btn btn-primary">+ New joke</a>
+</div>
+<div class="card overflow-hidden">
+	<div class="overflow-x-auto">
+		<table class="jokes-table w-full min-w-[640px] text-left">
+			<thead>
+				<tr>
+					<th scope="col">ID</th>
+					<th scope="col">Type</th>
+					<th scope="col">Content</th>
+					<th scope="col">Category</th>
+				</tr>
+			</thead>
+			<tbody>
+				<% it.jokes.forEach((joke) => { %>
+				<tr>
+					<td class="font-display text-sm"><%= joke.id %></td>
+					<td><span class="sticker <%= joke.type === 'joke' ? 'sticker-joke' : 'sticker-phrase' %>"><%= joke.type %></span></td>
+					<td><div class="max-w-[24rem] truncate" title="<%= joke.content %>"><%= joke.content %></div></td>
+					<td><span class="chip"><%= joke.category %></span></td>
+				</tr>
+				<% }) %>
+			</tbody>
+		</table>
+	</div>
+</div>
