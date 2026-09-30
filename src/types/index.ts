@@ -46,3 +46,10 @@ export interface JokeWithStats extends Joke {
 	score: number;
 	views: number;
 }
+
+export interface Admin {
+	id: number;
+	email: string;
+	passwordHash: string;
+	createdAt: string;
+}

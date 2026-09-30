@@ -15,7 +15,8 @@
     "test": "npm run test:types && npm run check && vitest run",
     "lint": "biome lint src tests",
     "format": "biome format --write src tests",
-    "check": "biome check src tests"
+    "check": "biome check src tests",
+    "admin:create": "tsx src/cli/admin-main.ts create"
   },
   "dependencies": {
     "@fastify/cors": "^11.1.0",
