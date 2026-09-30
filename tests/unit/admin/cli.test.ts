@@ -47,6 +47,27 @@ describe("admin CLI", () => {
 			expect(findAdminByEmail(db, "ana@example.com")).toBeUndefined();
 		});
 
+		it("should refuse an email that exists in any letter case", async () => {
+			await runAdminCommand(
+				["create", "--email", "ana@example.com", "--password-stdin"],
+				createFakeIo("a-long-password-1\n"),
+				db,
+			);
+			const io = createFakeIo("a-long-password-2\n");
+
+			const exitCode = await runAdminCommand(
+				["create", "--email", "ANA@example.com", "--password-stdin"],
+				io,
+				db,
+			);
+
+			expect(exitCode).toBe(1);
+			expect(io.errors()).toContain("already exists");
+			expect(db.prepare("SELECT COUNT(*) as count FROM admins").get()).toEqual({
+				count: 1,
+			});
+		});
+
 		it("should fail without an email", async () => {
 			const io = createFakeIo("a-long-password-1\n");
 

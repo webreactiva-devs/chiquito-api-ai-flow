@@ -3,7 +3,7 @@ import { parseArgs } from "node:util";
 import type Database from "better-sqlite3";
 import { normalizeEmail } from "../admin/email.js";
 import { findPasswordProblem, hashPassword } from "../admin/password.js";
-import { createAdmin } from "../db/admin-queries.js";
+import { createAdmin, findAdminByEmail } from "../db/admin-queries.js";
 
 export interface CommandIo {
 	stdin: NodeJS.ReadableStream;
@@ -39,6 +39,10 @@ const createAdminCommand = async (
 	}
 
 	const email = normalizeEmail(options.email);
+	if (findAdminByEmail(db, email)) {
+		io.stderr.write(`An admin with email ${email} already exists.\n`);
+		return 1;
+	}
 	const password = await readFirstLine(io.stdin);
 	const passwordProblem = findPasswordProblem(password);
 	if (passwordProblem) {
