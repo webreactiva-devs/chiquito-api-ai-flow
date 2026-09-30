@@ -1,8 +1,9 @@
+import { randomBytes } from "node:crypto";
 import type { FastifyPluginAsync } from "fastify";
 import { deleteSession, findAdminByEmail } from "../../db/admin-queries.js";
 import { normalizeEmail } from "../email.js";
 import { resolveNextPath } from "../next-path.js";
-import { verifyPassword } from "../password.js";
+import { hashPassword, verifyPassword } from "../password.js";
 import type { AdminPluginOptions } from "../plugin.js";
 import { SESSION_COOKIE, startSession } from "../sessions.js";
 
@@ -31,6 +32,10 @@ export const sessionRoutes: FastifyPluginAsync<AdminPluginOptions> = async (
 	app,
 	{ db, secureCookie },
 ) => {
+	const unknownAdminPasswordHash = await hashPassword(
+		randomBytes(32).toString("base64url"),
+	);
+
 	app.get<{ Querystring: { state?: string; next?: string } }>(
 		"/login",
 		(request, reply) =>
@@ -45,9 +50,11 @@ export const sessionRoutes: FastifyPluginAsync<AdminPluginOptions> = async (
 		{ schema: { body: loginBodySchema } },
 		async (request, reply) => {
 			const admin = findAdminByEmail(db, normalizeEmail(request.body.email));
-			const isValid =
-				admin !== undefined &&
-				(await verifyPassword(request.body.password, admin.passwordHash));
+			const passwordMatches = await verifyPassword(
+				request.body.password,
+				admin?.passwordHash ?? unknownAdminPasswordHash,
+			);
+			const isValid = admin !== undefined && passwordMatches;
 
 			if (!admin || !isValid) {
 				return reply.status(401).view("login.eta", {
