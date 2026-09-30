@@ -57,3 +57,12 @@ export const findSessionById = (
 export const deleteSession = (db: Database.Database, id: string): void => {
 	db.prepare("DELETE FROM sessions WHERE id = ?").run(id);
 };
+
+export const deleteExpiredSessions = (
+	db: Database.Database,
+	now: Date,
+): void => {
+	db.prepare("DELETE FROM sessions WHERE expires_at <= ?").run(
+		now.toISOString(),
+	);
+};

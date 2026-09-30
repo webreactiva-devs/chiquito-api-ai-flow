@@ -12,6 +12,7 @@ interface LoginBody {
 
 const LOGIN_NOTICES = new Map([
 	["loggedout", "You logged out. Hasta luego, Lucas!"],
+	["expired", "Your session expired. Log in again."],
 ]);
 
 const loginBodySchema = {

@@ -1,7 +1,12 @@
 import { randomBytes } from "node:crypto";
 import type Database from "better-sqlite3";
 import type { onRequestHookHandler } from "fastify";
-import { createSession, findSessionById } from "../db/admin-queries.js";
+import {
+	createSession,
+	deleteExpiredSessions,
+	deleteSession,
+	findSessionById,
+} from "../db/admin-queries.js";
 import type { AdminSession } from "../types/index.js";
 
 declare module "fastify" {
@@ -15,11 +20,15 @@ const SESSION_LIFETIME_MS = 24 * 60 * 60 * 1000;
 
 const randomToken = (): string => randomBytes(32).toString("base64url");
 
+export const isSessionExpired = (session: AdminSession, now: Date): boolean =>
+	session.expiresAt <= now.toISOString();
+
 export const startSession = (
 	db: Database.Database,
 	adminId: number,
 	now: Date,
 ): string => {
+	deleteExpiredSessions(db, now);
 	const id = randomToken();
 	createSession(db, {
 		id,
@@ -38,6 +47,10 @@ export const requireSession =
 		const session = sessionId ? findSessionById(db, sessionId) : undefined;
 		if (!session) {
 			return reply.redirect("/admin/login");
+		}
+		if (isSessionExpired(session, new Date())) {
+			deleteSession(db, session.id);
+			return reply.redirect("/admin/login?state=expired");
 		}
 		request.adminSession = session;
 	};
