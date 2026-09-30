@@ -36,12 +36,18 @@
 	</div>
 	<div>
 		<label class="label" for="category">Category</label>
-		<input class="field <%= it.errors.category ? 'field-invalid' : '' %>" id="category" name="category" type="text" value="<%= it.values.category %>"<% if (it.errors.category) { %> aria-describedby="category-error"<% } %>>
+		<input class="field <%= it.errors.category ? 'field-invalid' : '' %>" id="category" name="category" type="text" list="category-options" autocomplete="off" value="<%= it.values.category %>"<% if (it.errors.category) { %> aria-describedby="category-error"<% } %>>
+		<datalist id="category-options">
+			<% it.categories.forEach((category) => { %>
+			<option value="<%= category %>"></option>
+			<% }) %>
+		</datalist>
 		<% if (it.errors.category) { %><p id="category-error" class="mt-1 font-bold text-tomato-deep"><%= it.errors.category %></p><% } %>
 	</div>
 	<div>
 		<label class="label" for="content">Content</label>
-		<textarea class="field <%= it.errors.content ? 'field-invalid' : '' %>" id="content" name="content" rows="5"<% if (it.errors.content) { %> aria-describedby="content-error"<% } %>><%= it.values.content %></textarea>
+		<textarea class="field <%= it.errors.content ? 'field-invalid' : '' %>" id="content" name="content" rows="5" aria-describedby="content-counter<% if (it.errors.content) { %> content-error<% } %>"><%= it.values.content %></textarea>
+		<p id="content-counter" class="mt-1 text-right text-sm font-bold<%= it.contentLength > it.maxContentLength ? ' text-tomato-deep' : '' %>" data-max="<%= it.maxContentLength %>"><%= it.contentLength %> / <%= it.maxContentLength %></p>
 		<% if (it.errors.content) { %><p id="content-error" class="mt-1 font-bold text-tomato-deep"><%= it.errors.content %></p><% } %>
 	</div>
 	<div class="flex flex-wrap gap-3">
@@ -52,3 +58,13 @@
 		<% } %>
 	</div>
 </form>
+<script>
+	const contentField = document.getElementById("content");
+	const contentCounter = document.getElementById("content-counter");
+	const maxContentLength = Number(contentCounter.dataset.max);
+	contentField.addEventListener("input", () => {
+		const length = [...contentField.value].length;
+		contentCounter.textContent = `${length} / ${maxContentLength}`;
+		contentCounter.classList.toggle("text-tomato-deep", length > maxContentLength);
+	});
+</script>

@@ -3,14 +3,17 @@ import {
 	createJoke,
 	deleteJokeWithVotesAndStats,
 	getAllJokes,
+	getCategories,
 	getJokeById,
 	getJokeDeleteImpact,
 	updateJoke,
 } from "../../db/queries.js";
 import type { NewJoke } from "../../types/index.js";
 import {
+	countCharacters,
 	JOKE_TYPES,
 	type JokeFormErrors,
+	MAX_CONTENT_LENGTH,
 	validateJokeForm,
 } from "../joke-form.js";
 import type { AdminPluginOptions } from "../plugin.js";
@@ -38,20 +41,6 @@ const LIST_NOTICES = new Map([
 
 const EMPTY_JOKE: NewJoke = { type: "phrase", category: "", content: "" };
 
-const renderJokeForm = (
-	request: FastifyRequest,
-	reply: FastifyReply,
-	values: NewJoke,
-	{ jokeId, errors = {} }: { jokeId?: number; errors?: JokeFormErrors } = {},
-) =>
-	reply.view("jokes/form.eta", {
-		session: request.adminSession,
-		jokeTypes: JOKE_TYPES,
-		jokeId,
-		values,
-		errors,
-	});
-
 const renderJokeNotFound = (request: FastifyRequest, reply: FastifyReply) =>
 	reply
 		.status(404)
@@ -65,6 +54,23 @@ export const jokeRoutes: FastifyPluginAsync<AdminPluginOptions> = async (
 	{ db },
 ) => {
 	const findJoke = (params: JokeParams) => getJokeById(db, Number(params.id));
+
+	const renderJokeForm = (
+		request: FastifyRequest,
+		reply: FastifyReply,
+		values: NewJoke,
+		{ jokeId, errors = {} }: { jokeId?: number; errors?: JokeFormErrors } = {},
+	) =>
+		reply.view("jokes/form.eta", {
+			session: request.adminSession,
+			jokeTypes: JOKE_TYPES,
+			categories: getCategories(db).map(({ name }) => name),
+			maxContentLength: MAX_CONTENT_LENGTH,
+			contentLength: countCharacters(values.content),
+			jokeId,
+			values,
+			errors,
+		});
 
 	app.get("/", (_request, reply) => reply.redirect("/admin/jokes"));
 

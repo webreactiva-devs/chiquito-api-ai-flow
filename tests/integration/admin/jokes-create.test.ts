@@ -30,6 +30,31 @@ describe("Admin create joke", () => {
 		expect(response.body).not.toContain('role="alert"');
 	});
 
+	it("should suggest the current categories", async () => {
+		const response = await app.inject({
+			method: "GET",
+			url: "/admin/jokes/new",
+			headers: { cookie: session.cookie },
+		});
+
+		expect(response.body).toContain('list="category-options"');
+		for (const category of ["clásico", "crisis", "absurdo", "familia"]) {
+			expect(response.body).toContain(`<option value="${category}"></option>`);
+		}
+	});
+
+	it("should count the characters of the sent content", async () => {
+		const response = await postAsAdmin(
+			"/admin/jokes",
+			{ type: "joke", category: "absurdo", content: "a".repeat(1001) },
+			session,
+		);
+
+		expect(response.body).toMatch(
+			/text-tomato-deep" data-max="1000">1001 \/ 1000</,
+		);
+	});
+
 	it("should save trimmed values", async () => {
 		const response = await postAsAdmin(
 			"/admin/jokes",
