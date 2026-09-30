@@ -56,7 +56,7 @@ npx vitest run -t "should return all jokes"
 ## Code style
 
 - No inline comments; code must be self-documenting through descriptive names.
-- All code and documentation in English.
+- Write all code, documentation, specs, plans, ADRs, commits and pull requests in English. Use ASD-STE100 Simplified Technical English.
 - Error messages may include Chiquito references (e.g. "fistro").
 - Biome: tabs, double quotes, organized imports. Run `npm run check` before finishing.
 - ESM imports use the `.js` extension for local TypeScript files (`NodeNext` resolution).
@@ -73,4 +73,11 @@ Add or update tests with every behavior change. `npm test` must pass; it is what
 
 ## Git
 
-Conventional commits with gitmoji, e.g. `feat(api): 🎉 add categories endpoint`.
+- Use one branch for each feature. Start the branch name with `feature/`, e.g. `feature/categories-endpoint`.
+- Make small, atomic commits. One commit contains one logical change.
+- Use Conventional Commits with gitmoji, e.g. `feat(api): 🎉 add categories endpoint`.
+- Do not add agent signatures or `Co-Authored-By` trailers to commits.
+
+## Scratch files
+
+Put temporary working documents (notes, drafts, analysis) in `.scratchpad/`. Git ignores this folder. Do not put files there that must stay after the session.
