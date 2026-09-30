@@ -1,11 +1,16 @@
 import { describe, expect, it } from "vitest";
 import app from "../../../src/app.js";
-import { createTestAdmin, logIn, postForm } from "../../helpers/admin.js";
+import {
+	createTestAdmin,
+	logIn,
+	postAsAdmin,
+	sessionFromLogin,
+} from "../../helpers/admin.js";
 
 describe("Admin main path", () => {
 	it("should log in, list jokes, create a joke and serve it in the public API", async () => {
-		const loginResponse = await logIn(await createTestAdmin());
-		const cookie = `sid=${loginResponse.cookies[0].value}`;
+		const session = sessionFromLogin(await logIn(await createTestAdmin()));
+		const { cookie } = session;
 
 		const listResponse = await app.inject({
 			method: "GET",
@@ -21,14 +26,14 @@ describe("Admin main path", () => {
 		});
 		expect(formResponse.body).toContain('name="_csrf"');
 
-		const createResponse = await postForm(
+		const createResponse = await postAsAdmin(
 			"/admin/jokes",
 			{
 				type: "joke",
 				category: "absurdo",
 				content: "¿Te das cuen? Un chiste nuevo",
 			},
-			cookie,
+			session,
 		);
 		expect(createResponse.statusCode).toBe(302);
 		expect(createResponse.headers.location).toBe("/admin/jokes");

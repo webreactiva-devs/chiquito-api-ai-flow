@@ -1,3 +1,4 @@
+import type { LightMyRequestResponse } from "fastify";
 import { hashPassword } from "../../src/admin/password.js";
 import app from "../../src/app.js";
 import { createAdmin } from "../../src/db/admin-queries.js";
@@ -33,10 +34,26 @@ export const createTestAdmin = async (
 export const logIn = (email: string, password = TEST_PASSWORD) =>
 	postForm("/admin/login", { email, password });
 
-export const logInAsNewAdmin = async (): Promise<{ cookie: string }> => {
-	const response = await logIn(await createTestAdmin());
-	const sessionCookie = response.cookies.find(
-		(cookie) => cookie.name === "sid",
-	);
-	return { cookie: `sid=${sessionCookie?.value}` };
+export interface TestSession {
+	cookie: string;
+	csrfToken: string;
+}
+
+export const sessionFromLogin = (
+	response: LightMyRequestResponse,
+): TestSession => {
+	const sessionId = response.cookies.find(({ name }) => name === "sid")?.value;
+	const { csrfToken } = db
+		.prepare("SELECT csrf_token as csrfToken FROM sessions WHERE id = ?")
+		.get(sessionId) as { csrfToken: string };
+	return { cookie: `sid=${sessionId}`, csrfToken };
 };
+
+export const logInAsNewAdmin = async (): Promise<TestSession> =>
+	sessionFromLogin(await logIn(await createTestAdmin()));
+
+export const postAsAdmin = (
+	url: string,
+	fields: Record<string, string>,
+	{ cookie, csrfToken }: TestSession,
+) => postForm(url, { ...fields, _csrf: csrfToken }, cookie);

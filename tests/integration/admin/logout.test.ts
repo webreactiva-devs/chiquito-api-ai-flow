@@ -1,14 +1,15 @@
 import { describe, expect, it } from "vitest";
 import app from "../../../src/app.js";
 import db from "../../../src/db/connection.js";
-import { logInAsNewAdmin, postForm } from "../../helpers/admin.js";
+import { logInAsNewAdmin, postAsAdmin } from "../../helpers/admin.js";
 
 describe("Admin logout", () => {
 	it("should delete the session and redirect to the login page", async () => {
-		const { cookie } = await logInAsNewAdmin();
+		const session = await logInAsNewAdmin();
+		const { cookie } = session;
 		const sessionId = cookie.replace("sid=", "");
 
-		const response = await postForm("/admin/logout", {}, cookie);
+		const response = await postAsAdmin("/admin/logout", {}, session);
 
 		expect(response.statusCode).toBe(302);
 		expect(response.headers.location).toBe("/admin/login?state=loggedout");

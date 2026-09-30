@@ -1,0 +1,4 @@
+<% layout("/layout", { title: "Form expired", session: it.session }) %>
+<h1 class="text-2xl font-bold">Your form expired</h1>
+<p>Your form expired. Go back and try again.</p>
+<a href="/admin/jokes">Back to the jokes</a>
