@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title><%= it.title %> · Chiquito Admin</title>
+	<link rel="stylesheet" href="/admin/assets/admin.css">
+</head>
+<body class="flex min-h-screen flex-col">
+	<% if (it.session) { %>
+	<header class="bg-navy text-cream">
+		<div class="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-3 px-4 py-3">
+			<a href="/admin/jokes" class="font-display text-xl text-mustard sm:text-2xl">Chiquito <span class="text-cream">Admin</span></a>
+			<div class="flex min-w-0 items-center gap-3">
+				<span class="truncate text-sm"><span class="sr-only">Signed in as </span><%= it.session.adminEmail %></span>
+				<form method="post" action="/admin/logout">
+					<input type="hidden" name="_csrf" value="<%= it.session.csrfToken %>">
+					<button type="submit" class="btn btn-plain btn-sm">Log out</button>
+				</form>
+			</div>
+		</div>
+	</header>
+	<% } %>
+	<div class="retro-stripe" aria-hidden="true"></div>
+	<main class="mx-auto w-full max-w-6xl flex-1 px-4 py-8">
+		<%~ it.body %>
+	</main>
+</body>
+</html>

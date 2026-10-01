@@ -1,0 +1,61 @@
+<% const isEdit = it.jokeId !== undefined %>
+<% const title = isEdit ? `Edit joke #${it.jokeId}` : "New joke" %>
+<% layout("/layout", { title, session: it.session }) %>
+<% const errorCount = Object.keys(it.errors).length %>
+<a href="/admin/jokes" class="font-bold underline">« Back to the jokes</a>
+<h1 class="mt-4 mb-6 font-display text-3xl leading-none sm:text-4xl"><%= title %></h1>
+<% if (errorCount > 0) { %>
+<div class="alert alert-error mb-6 max-w-2xl" role="alert">
+	<span class="alert-icon" aria-hidden="true">!</span>
+	<div>
+		<p>Fix <%= errorCount %> <%= errorCount === 1 ? "error" : "errors" %>, pecador:</p>
+		<ul class="mt-1 list-disc pl-5 font-medium">
+			<% Object.values(it.errors).forEach((error) => { %>
+			<li><%= error %></li>
+			<% }) %>
+		</ul>
+	</div>
+</div>
+<% } %>
+<form method="post" action="<%= isEdit ? `/admin/jokes/${it.jokeId}` : '/admin/jokes' %>" class="card max-w-2xl space-y-5 p-6 sm:p-8" novalidate>
+	<input type="hidden" name="_csrf" value="<%= it.session.csrfToken %>">
+	<% if (isEdit) { %>
+	<div>
+		<span class="label">ID</span>
+		<span class="chip font-display"><%= it.jokeId %></span>
+	</div>
+	<% } %>
+	<div>
+		<label class="label" for="type">Type</label>
+		<select class="field <%= it.errors.type ? 'field-invalid' : '' %>" id="type" name="type"<% if (it.errors.type) { %> aria-describedby="type-error"<% } %>>
+			<% it.jokeTypes.forEach((jokeType) => { %>
+			<option value="<%= jokeType %>"<%= jokeType === it.values.type ? " selected" : "" %>><%= jokeType %></option>
+			<% }) %>
+		</select>
+		<% if (it.errors.type) { %><p id="type-error" class="mt-1 font-bold text-tomato-deep"><%= it.errors.type %></p><% } %>
+	</div>
+	<div>
+		<label class="label" for="category">Category</label>
+		<input class="field <%= it.errors.category ? 'field-invalid' : '' %>" id="category" name="category" type="text" list="category-options" autocomplete="off" value="<%= it.values.category %>"<% if (it.errors.category) { %> aria-describedby="category-error"<% } %>>
+		<datalist id="category-options">
+			<% it.categories.forEach((category) => { %>
+			<option value="<%= category %>"></option>
+			<% }) %>
+		</datalist>
+		<% if (it.errors.category) { %><p id="category-error" class="mt-1 font-bold text-tomato-deep"><%= it.errors.category %></p><% } %>
+	</div>
+	<div>
+		<label class="label" for="content">Content</label>
+		<textarea class="field <%= it.errors.content ? 'field-invalid' : '' %>" id="content" name="content" rows="5" aria-describedby="content-counter<% if (it.errors.content) { %> content-error<% } %>"><%= it.values.content %></textarea>
+		<p id="content-counter" class="mt-1 text-right text-sm font-bold<%= it.contentLength > it.maxContentLength ? ' text-tomato-deep' : '' %>" data-max="<%= it.maxContentLength %>"><%= it.contentLength %> / <%= it.maxContentLength %></p>
+		<% if (it.errors.content) { %><p id="content-error" class="mt-1 font-bold text-tomato-deep"><%= it.errors.content %></p><% } %>
+	</div>
+	<div class="flex flex-wrap gap-3">
+		<button type="submit" class="btn btn-primary"><%= isEdit ? "Save changes" : "Create joke" %></button>
+		<a href="/admin/jokes" class="btn btn-plain">Cancel</a>
+		<% if (isEdit) { %>
+		<a href="/admin/jokes/<%= it.jokeId %>/delete" class="ml-auto self-center font-bold text-tomato-deep underline">Delete this joke</a>
+		<% } %>
+	</div>
+</form>
+<script src="/admin/assets/content-counter.js" defer></script>

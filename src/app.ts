@@ -4,6 +4,7 @@ import cors from "@fastify/cors";
 import fastifySwagger from "@fastify/swagger";
 import fastifySwaggerUi from "@fastify/swagger-ui";
 import Fastify from "fastify";
+import { adminPlugin } from "./admin/plugin.js";
 import db from "./db/connection.js";
 import {
 	addVote,
@@ -42,6 +43,12 @@ if (!isProduction) {
 		routePrefix: "/docs",
 	});
 }
+
+await app.register(adminPlugin, {
+	prefix: "/admin",
+	db,
+	secureCookie: process.env.COOKIE_SECURE !== "false",
+});
 
 app.get("/api/categories", async () => {
 	try {

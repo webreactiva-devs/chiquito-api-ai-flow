@@ -46,3 +46,36 @@ export interface JokeWithStats extends Joke {
 	score: number;
 	views: number;
 }
+
+export interface Admin {
+	id: number;
+	email: string;
+	passwordHash: string;
+	createdAt: string;
+}
+
+export interface NewJoke {
+	type: string;
+	content: string;
+	category: string;
+}
+
+export interface AdminSession {
+	id: string;
+	adminId: number;
+	adminEmail: string;
+	csrfToken: string;
+	createdAt: string;
+	expiresAt: string;
+}
+
+export interface JokeWithActivity extends Joke {
+	upvotes: number;
+	downvotes: number;
+	views: number;
+}
+
+export interface JokeListFilters {
+	category?: string;
+	search?: string;
+}

@@ -133,5 +133,58 @@ describe("Database Queries", () => {
 
 			newDb.close();
 		});
+
+		it("should keep admins and sessions when dropping joke tables", () => {
+			dropTables(db);
+
+			const tables = db
+				.prepare("SELECT name FROM sqlite_master WHERE type='table'")
+				.all();
+			expect(tables).toContainEqual({ name: "admins" });
+			expect(tables).toContainEqual({ name: "sessions" });
+		});
+
+		it("should count the votes of a joke with an index, not a table scan", () => {
+			const plan = db
+				.prepare(
+					"EXPLAIN QUERY PLAN SELECT COUNT(*) FROM votes WHERE joke_id = ? AND vote_type = 'up'",
+				)
+				.all(1) as { detail: string }[];
+			const details = plan.map(({ detail }) => detail);
+
+			expect(details).toContainEqual(
+				expect.stringContaining(
+					"USING COVERING INDEX idx_votes_joke_id_vote_type",
+				),
+			);
+			expect(details).not.toContainEqual(expect.stringMatching(/^SCAN votes/));
+		});
+
+		it("should create indexes on the session admin and expiry columns", () => {
+			const indexes = db
+				.prepare(
+					"SELECT name FROM sqlite_master WHERE type = 'index' AND tbl_name = 'sessions'",
+				)
+				.all();
+
+			expect(indexes).toContainEqual({ name: "idx_sessions_admin_id" });
+			expect(indexes).toContainEqual({ name: "idx_sessions_expires_at" });
+		});
+
+		it("should delete the sessions of a deleted admin", () => {
+			db.prepare(
+				"INSERT INTO admins (id, email, password_hash) VALUES (1, 'ana@example.com', 'hash')",
+			).run();
+			db.prepare(
+				"INSERT INTO sessions (id, admin_id, csrf_token, created_at, expires_at) VALUES ('sid', 1, 'token', 'now', 'later')",
+			).run();
+
+			db.prepare("DELETE FROM admins WHERE id = 1").run();
+
+			const sessionCount = db
+				.prepare("SELECT COUNT(*) as count FROM sessions")
+				.get() as { count: number };
+			expect(sessionCount.count).toBe(0);
+		});
 	});
 });

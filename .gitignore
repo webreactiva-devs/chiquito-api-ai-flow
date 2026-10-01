@@ -71,7 +71,6 @@ dist
 
 # Gatsby files
 .cache/
-public
 
 # Storybook build outputs
 .out
@@ -80,6 +79,7 @@ public
 # Temporary folders
 tmp/
 temp/
+.scratchpad/
 
 # Editor directories and files
 .vscode/
@@ -101,3 +101,7 @@ Thumbs.db
 data/*.db
 data/*.db-wal
 data/*.db-shm
+
+# Generated admin CSS
+public/admin/*
+!public/admin/.gitkeep

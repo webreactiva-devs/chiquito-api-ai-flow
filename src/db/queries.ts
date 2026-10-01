@@ -3,10 +3,14 @@ import type {
 	Category,
 	GlobalStats,
 	Joke,
+	JokeListFilters,
+	JokeWithActivity,
 	JokeWithStats,
+	NewJoke,
 	VoteResult,
 	VoteType,
 } from "../types/index.js";
+import { escapeLikePattern } from "./functions.js";
 
 export const getAllJokes = (db: Database.Database): Joke[] => {
 	return db
@@ -54,6 +58,13 @@ export const insertJoke = (db: Database.Database, joke: Joke): void => {
 	db.prepare(
 		"INSERT INTO jokes (id, type, content, category) VALUES (?, ?, ?, ?)",
 	).run(joke.id, joke.type, joke.content, joke.category);
+};
+
+export const createJoke = (db: Database.Database, joke: NewJoke): number => {
+	const result = db
+		.prepare("INSERT INTO jokes (type, content, category) VALUES (?, ?, ?)")
+		.run(joke.type, joke.content, joke.category);
+	return Number(result.lastInsertRowid);
 };
 
 export const insertJokes = (db: Database.Database, jokes: Joke[]): void => {
@@ -198,4 +209,86 @@ export const getTopJokes = (
 			};
 			return { ...r, score: r.upvotes - r.downvotes };
 		}) as JokeWithStats[];
+};
+
+export const updateJoke = (
+	db: Database.Database,
+	id: number,
+	joke: NewJoke,
+): void => {
+	db.prepare(
+		"UPDATE jokes SET type = ?, content = ?, category = ? WHERE id = ?",
+	).run(joke.type, joke.content, joke.category, id);
+};
+
+export const getJokeDeleteImpact = (
+	db: Database.Database,
+	id: number,
+): { votes: number; views: number } => {
+	return db
+		.prepare(`
+    SELECT
+      (SELECT COUNT(*) FROM votes WHERE joke_id = ?) as votes,
+      COALESCE((SELECT views FROM stats WHERE joke_id = ?), 0) as views
+  `)
+		.get(id, id) as { votes: number; views: number };
+};
+
+export const deleteJokeWithVotesAndStats = (
+	db: Database.Database,
+	id: number,
+): void => {
+	db.transaction(() => {
+		db.prepare("DELETE FROM votes WHERE joke_id = ?").run(id);
+		db.prepare("DELETE FROM stats WHERE joke_id = ?").run(id);
+		db.prepare("DELETE FROM jokes WHERE id = ?").run(id);
+	})();
+};
+
+const buildJokeFilter = ({ category, search }: JokeListFilters) => {
+	const conditions: string[] = [];
+	const parameters: string[] = [];
+	if (category) {
+		conditions.push("j.category = ?");
+		parameters.push(category);
+	}
+	if (search) {
+		conditions.push("lower_text(j.content) LIKE ? ESCAPE '\\'");
+		parameters.push(`%${escapeLikePattern(search.toLowerCase())}%`);
+	}
+	const where = conditions.length ? `WHERE ${conditions.join(" AND ")}` : "";
+	return { where, parameters };
+};
+
+export const countJokes = (
+	db: Database.Database,
+	filters: JokeListFilters = {},
+): number => {
+	const { where, parameters } = buildJokeFilter(filters);
+	const result = db
+		.prepare(`SELECT COUNT(*) as count FROM jokes j ${where}`)
+		.get(...parameters) as { count: number };
+	return result.count;
+};
+
+export const listJokesWithActivity = (
+	db: Database.Database,
+	filters: JokeListFilters = {},
+	{ limit, offset } = { limit: -1, offset: 0 },
+): JokeWithActivity[] => {
+	const { where, parameters } = buildJokeFilter(filters);
+	return db
+		.prepare(`
+    SELECT
+      j.id, j.type, j.content, j.category,
+      (SELECT COUNT(*) FROM votes v WHERE v.joke_id = j.id AND v.vote_type = 'up') as upvotes,
+      (SELECT COUNT(*) FROM votes v WHERE v.joke_id = j.id AND v.vote_type = 'down') as downvotes,
+      COALESCE(s.views, 0) as views
+    FROM jokes j
+    LEFT JOIN stats s ON s.joke_id = j.id
+    ${where}
+    ORDER BY j.id
+    LIMIT ? OFFSET ?
+  `)
+		.all(...parameters, limit, offset) as JokeWithActivity[];
 };

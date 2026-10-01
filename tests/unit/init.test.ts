@@ -1,92 +1,61 @@
-import { readFileSync } from "node:fs";
-import Database from "better-sqlite3";
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import type Database from "better-sqlite3";
+import { beforeEach, describe, expect, it } from "vitest";
+import { createAdmin } from "../../src/db/admin-queries.js";
+import { initializeDatabase } from "../../src/db/init.js";
+import { addVote, getAllJokes, incrementViews } from "../../src/db/queries.js";
+import type { Joke } from "../../src/types/index.js";
+import { createTestDatabase } from "../helpers/database.js";
 
-// Mock the necessary modules
-vi.mock("node:fs", async () => {
-	const actual = await vi.importActual("node:fs");
-	return {
-		...actual,
-		readFileSync: vi.fn().mockReturnValue(
-			JSON.stringify({
-				jokes: [
-					{
-						id: 1,
-						type: "phrase",
-						content: "Test joke 1",
-						category: "test",
-					},
-					{
-						id: 2,
-						type: "phrase",
-						content: "Test joke 2",
-						category: "test",
-					},
-				],
-			}),
-		),
-	};
-});
+const seedJokes: Joke[] = [
+	{ id: 1, type: "phrase", content: "Test joke 1", category: "test" },
+	{ id: 2, type: "phrase", content: "Test joke 2", category: "test" },
+];
 
-vi.mock("node:path", async () => {
-	const actual = await vi.importActual("node:path");
-	return {
-		...actual,
-		join: vi.fn().mockReturnValue("/mock/path/chiquito.json"),
-		dirname: vi.fn().mockReturnValue("/mock/path"),
-	};
-});
+const count = (db: Database.Database, table: string): number =>
+	(
+		db.prepare(`SELECT COUNT(*) as count FROM ${table}`).get() as {
+			count: number;
+		}
+	).count;
 
-vi.mock("node:url", async () => {
-	return {
-		fileURLToPath: vi.fn().mockReturnValue("/mock/path"),
-	};
-});
-
-// Mock console.log to prevent actual logging during tests
-vi.spyOn(console, "log").mockImplementation(() => {});
-
-describe("Database Initialization", () => {
-	let originalEnv: typeof process.env;
+describe("initializeDatabase", () => {
+	let db: Database.Database;
 
 	beforeEach(() => {
-		originalEnv = process.env;
+		db = createTestDatabase();
 	});
 
-	afterEach(() => {
-		process.env = originalEnv;
-		vi.clearAllMocks();
+	it("should seed an empty database", () => {
+		expect(initializeDatabase(db, seedJokes, { force: false })).toBe(true);
+
+		expect(getAllJokes(db)).toEqual(seedJokes);
 	});
 
-	it("should initialize database with jokes from JSON file", async () => {
-		// We need to test the initialization logic without running the full init script
-		// since it executes immediately when imported
+	it("should refuse a database with jokes without force", () => {
+		initializeDatabase(db, seedJokes, { force: false });
+		addVote(db, 1, "up");
 
-		// Import the necessary functions to test
-		const { createTables, dropTables } = await import("../../src/db/schema.js");
-		const { insertJokes, getAllJokes } = await import(
-			"../../src/db/queries.js"
-		);
+		expect(initializeDatabase(db, [], { force: false })).toBe(false);
 
-		// Create an in-memory database for testing
-		const db = new Database(":memory:");
-		db.pragma("foreign_keys = ON");
+		expect(count(db, "jokes")).toBe(2);
+		expect(count(db, "votes")).toBe(1);
+	});
 
-		// Load test data
-		const dataPath = "/mock/path/chiquito.json";
-		const { jokes } = JSON.parse(readFileSync(dataPath, "utf8"));
+	it("should reset jokes, votes and stats but keep admins and sessions with force", () => {
+		initializeDatabase(db, seedJokes, { force: false });
+		addVote(db, 1, "up");
+		incrementViews(db, 1);
+		const adminId = createAdmin(db, "ana@example.com", "hash");
+		db.prepare(
+			"INSERT INTO sessions (id, admin_id, csrf_token, created_at, expires_at) VALUES ('sid', ?, 'token', 'now', 'later')",
+		).run(adminId);
 
-		// Run initialization steps
-		dropTables(db);
-		createTables(db);
-		insertJokes(db, jokes);
+		expect(initializeDatabase(db, [seedJokes[0]], { force: true })).toBe(true);
 
-		// Verify jokes were inserted
-		const allJokes = getAllJokes(db);
-		expect(allJokes).toHaveLength(2);
-		expect(allJokes[0].content).toBe("Test joke 1");
-		expect(allJokes[1].content).toBe("Test joke 2");
-
-		db.close();
+		expect(getAllJokes(db)).toEqual([seedJokes[0]]);
+		expect(count(db, "votes")).toBe(0);
+		expect(count(db, "stats")).toBe(0);
+		expect(count(db, "admins")).toBe(1);
+		expect(count(db, "sessions")).toBe(1);
 	});
 });

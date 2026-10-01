@@ -23,6 +23,26 @@ export const createTables = (db: Database.Database): void => {
       last_viewed TEXT,
       FOREIGN KEY (joke_id) REFERENCES jokes(id)
     );
+
+    CREATE TABLE IF NOT EXISTS admins (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      email TEXT NOT NULL UNIQUE,
+      password_hash TEXT NOT NULL,
+      created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+    );
+
+    CREATE TABLE IF NOT EXISTS sessions (
+      id TEXT PRIMARY KEY,
+      admin_id INTEGER NOT NULL,
+      csrf_token TEXT NOT NULL,
+      created_at TEXT NOT NULL,
+      expires_at TEXT NOT NULL,
+      FOREIGN KEY (admin_id) REFERENCES admins(id) ON DELETE CASCADE
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_votes_joke_id_vote_type ON votes(joke_id, vote_type);
+    CREATE INDEX IF NOT EXISTS idx_sessions_admin_id ON sessions(admin_id);
+    CREATE INDEX IF NOT EXISTS idx_sessions_expires_at ON sessions(expires_at);
   `);
 };
 
