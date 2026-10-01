@@ -11,7 +11,7 @@ export interface Pagination {
 
 export const parsePage = (value: string | undefined): number => {
 	const page = Number(value);
-	return Number.isInteger(page) && page >= 1 ? page : 1;
+	return Number.isSafeInteger(page) && page >= 1 ? page : 1;
 };
 
 export const paginate = (

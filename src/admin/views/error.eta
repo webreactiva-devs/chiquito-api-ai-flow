@@ -1,0 +1,7 @@
+<% layout("/layout", { title: it.title, session: it.session }) %>
+<div class="card mx-auto max-w-xl p-8 text-center">
+	<p class="inline-block -rotate-3 rounded-full border-2 border-navy bg-tomato-deep px-3 py-1 font-display text-xs text-white shadow-hard-sm"><%= it.statusCode %></p>
+	<h1 class="mt-4 font-display text-3xl leading-none"><%= it.title %></h1>
+	<p class="mt-4 font-medium"><%= it.message %></p>
+	<a href="/admin/jokes" class="btn btn-primary mt-6">Back to the jokes</a>
+</div>

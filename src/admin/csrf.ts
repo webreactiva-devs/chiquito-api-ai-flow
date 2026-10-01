@@ -17,8 +17,11 @@ export const requireCsrfToken: preValidationHookHandler = async (
 	if (request.method !== "POST") {
 		return;
 	}
-	const sentToken = (request.body as { _csrf?: string } | undefined)?._csrf;
-	if (!tokensMatch(sentToken ?? "", request.adminSession.csrfToken)) {
+	const sentToken = (request.body as { _csrf?: unknown } | undefined)?._csrf;
+	if (
+		typeof sentToken !== "string" ||
+		!tokensMatch(sentToken, request.adminSession.csrfToken)
+	) {
 		return reply
 			.status(403)
 			.view("forbidden.eta", { session: request.adminSession });

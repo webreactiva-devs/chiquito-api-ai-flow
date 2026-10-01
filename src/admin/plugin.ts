@@ -5,7 +5,7 @@ import fastifyStatic from "@fastify/static";
 import view from "@fastify/view";
 import type Database from "better-sqlite3";
 import { Eta } from "eta";
-import type { FastifyPluginAsync } from "fastify";
+import type { FastifyError, FastifyPluginAsync } from "fastify";
 import { requireCsrfToken } from "./csrf.js";
 import { jokeRoutes } from "./routes/joke-routes.js";
 import { logoutRoutes, sessionRoutes } from "./routes/session-routes.js";
@@ -45,6 +45,28 @@ export const adminPlugin: FastifyPluginAsync<AdminPluginOptions> = async (
 	await app.register(view, {
 		engine: { eta: new Eta() },
 		root: viewsDirectory,
+	});
+	app.setNotFoundHandler((request, reply) =>
+		reply.status(404).view("error.eta", {
+			session: request.adminSession,
+			statusCode: 404,
+			title: "Page not found, fistro",
+			message: "This page does not exist in the admin panel.",
+		}),
+	);
+	app.setErrorHandler((error: FastifyError, request, reply) => {
+		const isInvalidForm = error.validation !== undefined;
+		if (!isInvalidForm) {
+			request.log.error(error);
+		}
+		return reply.status(isInvalidForm ? 400 : 500).view("error.eta", {
+			session: request.adminSession,
+			statusCode: isInvalidForm ? 400 : 500,
+			title: isInvalidForm ? "Incomplete form" : "Something went wrong",
+			message: isInvalidForm
+				? "The form is not complete. Go back and try again."
+				: "The server could not do this. Try again in a moment.",
+		});
 	});
 	await app.register(sessionRoutes, routeOptions);
 	await app.register(protectedRoutes, routeOptions);

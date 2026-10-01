@@ -9,6 +9,8 @@ describe("parsePage", () => {
 		["0", 1],
 		["-3", 1],
 		["1.5", 1],
+		["1e19", 1],
+		["9007199254740991", 9007199254740991],
 	])("should read %s as page %i", (value, expected) => {
 		expect(parsePage(value)).toBe(expected);
 	});
