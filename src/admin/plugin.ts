@@ -9,6 +9,7 @@ import type { FastifyError, FastifyPluginAsync } from "fastify";
 import { requireCsrfToken } from "./csrf.js";
 import { jokeRoutes } from "./routes/joke-routes.js";
 import { logoutRoutes, sessionRoutes } from "./routes/session-routes.js";
+import { addSecurityHeaders } from "./security-headers.js";
 import { requireSession } from "./sessions.js";
 
 export interface AdminPluginOptions {
@@ -18,6 +19,7 @@ export interface AdminPluginOptions {
 
 const viewsDirectory = join(import.meta.dirname, "views");
 const assetsDirectory = join(import.meta.dirname, "../../public/admin");
+const scriptsDirectory = join(import.meta.dirname, "scripts");
 
 const protectedRoutes: FastifyPluginAsync<AdminPluginOptions> = async (
 	app,
@@ -36,10 +38,11 @@ export const adminPlugin: FastifyPluginAsync<AdminPluginOptions> = async (
 	{ db, secureCookie },
 ) => {
 	const routeOptions = { db, secureCookie };
+	app.addHook("onSend", addSecurityHeaders);
 	await app.register(cookie);
 	await app.register(formbody);
 	await app.register(fastifyStatic, {
-		root: assetsDirectory,
+		root: [assetsDirectory, scriptsDirectory],
 		prefix: "/assets/",
 	});
 	await app.register(view, {

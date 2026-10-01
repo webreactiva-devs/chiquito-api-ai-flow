@@ -24,3 +24,4 @@ Classification:
 | [0013](0013-count-characters-as-code-points.md) | Count text length in Unicode code points | Reversible |
 | [0014](0014-validate-next-with-url-parsing.md) | Validate the login next path with URL parsing | Reversible |
 | [0015](0015-admin-cli-with-injected-io.md) | Run admin CLI commands with injected input, output and database | Reversible |
+| [0016](0016-admin-security-headers.md) | Send security headers on all admin responses | Reversible |
