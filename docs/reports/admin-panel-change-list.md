@@ -73,3 +73,22 @@ Each item has one ID, so that commits and pull requests can refer to it (for exa
 | CL-31 | 🟡 | Tidy up: constants for the `/admin` paths and cookie options, remove duplicates and unused exports, stricter types (`JokeType`, `Omit<>`), one date format. | Y15–Y19 |
 | CL-32 | 🟡 | Pin the exact versions of the font packages (`build:fonts` copies fixed file names). | Y12 |
 | CL-33 | 🟡 | Check the `scrypt` prefix in `verifyPassword`. Explain `p=5` in ADR 0003. | Y24 |
+
+## Status on 2026-10-01
+
+| ID | Status | Commits | Verification |
+| --- | --- | --- | --- |
+| CL-1 | Done | `4ddd7eb` | 8 new integration tests (400, 404, 500 HTML pages, unsafe page numbers, non-string CSRF token). |
+| CL-2 | Done | `b3f15f5` | `npm run dev` ran: the watcher stayed alive and wrote new CSS after a template change. ADR 0011 updated. |
+| CL-3 | Done | `b32e628` | Unit test for `--emial`. Manual run: exit code 1, no stack trace. |
+| CL-4 | Done | `87e95bd` | Each pagination test passes alone. |
+| CL-5 | Done | `3d39e61` | Headless Chrome at 375 px: document `scrollWidth` 375 (was 1080). |
+| CL-8 | Done | `b7c0751` | 7 integration tests. Headless Chrome: CSS, fonts and counter work with the CSP; Back after logout shows the login page. ADR 0016. |
+| CL-9 | Done | `bfd31ed`, `acde080` | Sessions are stored as SHA-256 hex. A new database and its `-wal` and `-shm` files are `0600`. Old sessions stop working once. An old `-wal` or `-shm` file keeps its mode until SQLite deletes it. |
+| CL-11 | Done | `76e3aaf` | `EXPLAIN QUERY PLAN` uses `idx_votes_joke_id_vote_type`; no `SCAN votes`. |
+| CL-15 | Done | `9aa99fb` | Spec §3.1, §3.3, §7 and §12 match the code. |
+| CL-6, CL-7 | Open | — | Product owner decision. |
+| CL-10, CL-12 | Open | — | Need a design decision (migrations, production start path). |
+| CL-13, CL-14, CL-16 to CL-33 | Open | — | Not started. |
+
+`npm test`: 38 files, 245 tests pass.
