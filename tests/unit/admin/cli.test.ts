@@ -257,4 +257,19 @@ describe("admin CLI", () => {
 		expect(exitCode).toBe(1);
 		expect(io.errors()).toContain("Usage");
 	});
+
+	it("should fail with an unknown option and show the usage line", async () => {
+		const io = createFakeIo("");
+
+		const exitCode = await runAdminCommand(
+			["create", "--emial", "ana@example.com"],
+			io,
+			db,
+		);
+
+		expect(exitCode).toBe(1);
+		expect(io.errors()).toContain("Unknown option '--emial'");
+		expect(io.errors()).toContain("Usage: admin");
+		expect(findAdminByEmail(db, "ana@example.com")).toBeUndefined();
+	});
 });

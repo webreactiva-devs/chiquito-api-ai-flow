@@ -136,29 +136,36 @@ const COMMANDS: Record<
 	password: changePasswordCommand,
 };
 
+const USAGE = "Usage: admin <create|list|delete|password> [options]";
+
+const parseCommandLine = (args: string[]) => {
+	try {
+		return parseArgs({
+			args,
+			allowPositionals: true,
+			options: {
+				email: { type: "string" },
+				"password-stdin": { type: "boolean" },
+			},
+		});
+	} catch (error) {
+		throw new CommandFailure(`${(error as Error).message}\n${USAGE}`);
+	}
+};
+
 export const runAdminCommand = async (
 	args: string[],
 	io: CommandIo,
 	db: Database.Database,
 ): Promise<ExitCode> => {
-	const { positionals, values } = parseArgs({
-		args,
-		allowPositionals: true,
-		options: {
-			email: { type: "string" },
-			"password-stdin": { type: "boolean" },
-		},
-	});
-
-	const command = Object.hasOwn(COMMANDS, positionals[0] ?? "")
-		? COMMANDS[positionals[0]]
-		: undefined;
-	if (!command) {
-		io.stderr.write("Usage: admin <create|list|delete|password> [options]\n");
-		return 1;
-	}
-
 	try {
+		const { positionals, values } = parseCommandLine(args);
+		const command = Object.hasOwn(COMMANDS, positionals[0] ?? "")
+			? COMMANDS[positionals[0]]
+			: undefined;
+		if (!command) {
+			throw new CommandFailure(USAGE);
+		}
 		await command(values, io, db);
 		return 0;
 	} catch (error) {
