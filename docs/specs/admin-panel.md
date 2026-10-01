@@ -142,7 +142,7 @@ Use `--password-stdin` where no interactive terminal exists (Docker, CI, deploy 
 
 | Topic | Decision |
 | --- | --- |
-| Storage | Table `sessions` in SQLite: `id`, `admin_id`, `csrf_token`, `created_at`, `expires_at`. |
+| Storage | Table `sessions` in SQLite: `id`, `admin_id`, `csrf_token`, `created_at`, `expires_at`. `id` holds the SHA-256 hash (hex) of the cookie value, not the cookie value. The server finds and deletes sessions by this hash. |
 | Cookie | Name `sid`. Value: 32 random bytes. `HttpOnly`, `SameSite=Lax`, `Path=/admin`, `Secure`. `Secure` is on by default. Only `COOKIE_SECURE=false` turns it off (for local HTTP). `NODE_ENV` has no effect on it. |
 | Lifetime | 24 hours, absolute, from login. Activity does not extend it. |
 | Clean-up | A request with an expired session deletes that session. Each login also deletes all expired sessions. |

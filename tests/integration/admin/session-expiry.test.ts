@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { hashSessionId } from "../../../src/admin/sessions.js";
 import app from "../../../src/app.js";
 import db from "../../../src/db/connection.js";
 import { logInAsNewAdmin } from "../../helpers/admin.js";
@@ -11,7 +12,7 @@ describe("Admin session expiry", () => {
 			.prepare(
 				"SELECT created_at as createdAt, expires_at as expiresAt FROM sessions WHERE id = ?",
 			)
-			.get(cookie.replace("sid=", "")) as {
+			.get(hashSessionId(cookie.replace("sid=", ""))) as {
 			createdAt: string;
 			expiresAt: string;
 		};
@@ -23,7 +24,7 @@ describe("Admin session expiry", () => {
 
 	it("should send an expired session to the login page and delete it", async () => {
 		const { cookie } = await logInAsNewAdmin();
-		const sessionId = cookie.replace("sid=", "");
+		const sessionId = hashSessionId(cookie.replace("sid=", ""));
 		db.prepare("UPDATE sessions SET expires_at = ? WHERE id = ?").run(
 			new Date(Date.now() - 1000).toISOString(),
 			sessionId,

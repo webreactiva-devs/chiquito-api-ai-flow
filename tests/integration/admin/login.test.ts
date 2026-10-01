@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { hashSessionId } from "../../../src/admin/sessions.js";
 import app from "../../../src/app.js";
 import db from "../../../src/db/connection.js";
 import {
@@ -60,7 +61,8 @@ describe("Admin login", () => {
 				"SELECT s.id FROM sessions s JOIN admins a ON a.id = s.admin_id WHERE a.email = ?",
 			)
 			.get(email) as { id: string };
-		expect(session.id).toBe(cookie?.value);
+		expect(session.id).not.toBe(cookie?.value);
+		expect(session.id).toBe(hashSessionId(cookie?.value ?? ""));
 	});
 
 	it("should reject a wrong password", async () => {

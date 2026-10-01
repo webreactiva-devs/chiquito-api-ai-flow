@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { hashSessionId } from "../../../src/admin/sessions.js";
 import app from "../../../src/app.js";
 import db from "../../../src/db/connection.js";
 import { logInAsNewAdmin, postAsAdmin } from "../../helpers/admin.js";
@@ -7,7 +8,7 @@ describe("Admin logout", () => {
 	it("should delete the session and redirect to the login page", async () => {
 		const session = await logInAsNewAdmin();
 		const { cookie } = session;
-		const sessionId = cookie.replace("sid=", "");
+		const sessionId = hashSessionId(cookie.replace("sid=", ""));
 
 		const response = await postAsAdmin("/admin/logout", {}, session);
 

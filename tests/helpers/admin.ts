@@ -1,5 +1,6 @@
 import type { LightMyRequestResponse } from "fastify";
 import { hashPassword } from "../../src/admin/password.js";
+import { hashSessionId } from "../../src/admin/sessions.js";
 import app from "../../src/app.js";
 import { createAdmin } from "../../src/db/admin-queries.js";
 import db from "../../src/db/connection.js";
@@ -45,7 +46,7 @@ export const sessionFromLogin = (
 	const sessionId = response.cookies.find(({ name }) => name === "sid")?.value;
 	const { csrfToken } = db
 		.prepare("SELECT csrf_token as csrfToken FROM sessions WHERE id = ?")
-		.get(sessionId) as { csrfToken: string };
+		.get(hashSessionId(sessionId ?? "")) as { csrfToken: string };
 	return { cookie: `sid=${sessionId}`, csrfToken };
 };
 
