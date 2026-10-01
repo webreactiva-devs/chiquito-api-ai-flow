@@ -37,7 +37,7 @@
 </div>
 <% } else { %>
 <div class="card overflow-hidden">
-	<div class="overflow-x-auto">
+	<div class="relative overflow-x-auto">
 		<table class="jokes-table w-full min-w-[820px] text-left">
 			<thead>
 				<tr>
