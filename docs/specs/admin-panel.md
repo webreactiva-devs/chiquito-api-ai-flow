@@ -53,7 +53,8 @@ Admins manage the jokes (list, create, edit, delete) through a web panel. The pa
 | Templates | `@fastify/view` with Eta. Eta escapes output by default. |
 | Styles | Tailwind CSS v4 through `@tailwindcss/cli`. The CLI generates one CSS file. `@fastify/static` serves it under `/admin/assets`. The generated file is in `.gitignore`. |
 | Language | All UI text is in English. Chiquito references are allowed in notices and empty states. |
-| JavaScript | Not necessary for any feature. Small scripts for progressive enhancement only (for example, the character counter). |
+| JavaScript | Not necessary for any feature. Small scripts for progressive enhancement only (for example, the character counter). Scripts are files in `src/admin/scripts/`, served under `/admin/assets/`. No inline scripts (ADR 0016). |
+| Error pages | The admin plugin renders HTML error pages: `400` for an incomplete form, `404` for an unknown `/admin` path, `500` for an unexpected error. They show no internal error details. The public API keeps its JSON errors. |
 | OpenAPI | `/admin` routes return HTML. They are not in `spec/openapi.yaml`. `AGENTS.md` and `README.md` document this. |
 
 Architecture:
@@ -145,12 +146,13 @@ Use `--password-stdin` where no interactive terminal exists (Docker, CI, deploy 
 | Storage | Table `sessions` in SQLite: `id`, `admin_id`, `csrf_token`, `created_at`, `expires_at`. `id` holds the SHA-256 hash (hex) of the cookie value, not the cookie value. The server finds and deletes sessions by this hash. |
 | Cookie | Name `sid`. Value: 32 random bytes. `HttpOnly`, `SameSite=Lax`, `Path=/admin`, `Secure`. `Secure` is on by default. Only `COOKIE_SECURE=false` turns it off (for local HTTP). `NODE_ENV` has no effect on it. |
 | Lifetime | 24 hours, absolute, from login. Activity does not extend it. |
-| Clean-up | A request with an expired session deletes that session. Each login also deletes all expired sessions. |
+| Clean-up | A request with an expired session deletes that session. Each successful login also deletes all expired sessions. |
 | CSRF | Each session has a random `csrf_token`. Every state-changing form sends it in the hidden field `_csrf`. The server compares it with `timingSafeEqual`. |
 | Login errors | One generic message: "Invalid email or password." |
 | Email enumeration | When the email does not exist, the server verifies the password against a fixed dummy hash. Thus, the response time is the same for known and unknown emails. |
-| Redirect after login | To `next` if `next` starts with `/admin/` and has no scheme or host. Otherwise to `/admin/jokes`. |
+| Redirect after login | To `next` if `next` starts with `/admin/` and has no scheme or host. To `/admin/jokes` if `next` is not safe. To `/admin/jokes?notice=welcome` if the form has no `next`. |
 | Rate limit | None. See [Known risks](#8-known-risks). |
+| Security headers | Every `/admin` response has `Content-Security-Policy` (`default-src 'self'`, `frame-ancestors 'none'`), `X-Frame-Options: DENY`, `X-Content-Type-Options: nosniff` and `Referrer-Policy: same-origin`. HTML responses also have `Cache-Control: no-store` (ADR 0016). |
 | Login concurrency | Maximum 4 password verifications at the same time, in the whole process. A login request that arrives when 4 are in progress gets `503` with the login form and the message "The server is busy. Try again in a moment." The request does not wait in a queue. This protects the public API from CPU and thread-pool exhaustion. |
 
 Login flow:
@@ -425,9 +427,9 @@ The layout works at 375 px and at 1280 px. On small screens, the table scrolls h
 ## 7. Dependencies
 
 - Runtime: `@fastify/cookie`, `@fastify/formbody`, `@fastify/static`, `@fastify/view`, `eta`.
-- Development: `@tailwindcss/cli`, `tailwindcss`.
-- Scripts: `build:css`, `admin:create`, `admin:list`, `admin:delete`, `admin:password`.
-- `npm run dev` runs `tsx watch` and the Tailwind watcher together, with `COOKIE_SECURE=false`.
+- Development: `@tailwindcss/cli`, `tailwindcss`, `@fontsource/bungee`, `@fontsource-variable/rubik`.
+- Scripts: `build:fonts` (copies the font files to `public/admin/fonts`), `build:css` (runs `build:fonts`, then Tailwind), `admin:create`, `admin:list`, `admin:delete`, `admin:password`.
+- `npm run dev` runs `tsx watch` and the Tailwind watcher (`--watch=always`) together, with `COOKIE_SECURE=false`.
 - New environment variable `COOKIE_SECURE` (default `true`). Add it to the environment table in `AGENTS.md` and `README.md`.
 - `npm run build` builds the CSS and compiles TypeScript. `npm start` does not build the CSS, because `@tailwindcss/cli` is a development dependency. Run `npm run build` (or `npm run build:css`) before `npm start`.
 - The assets folder is in git with a `.gitkeep` file. Only the generated CSS file is in `.gitignore`. Thus, `@fastify/static` can start on a fresh clone, and `npm test` does not need the CSS.
@@ -699,8 +701,8 @@ The layout works at 375 px and at 1280 px. On small screens, the table scrolls h
 - New e2e tests.
 - Deployment configuration.
 
-## 12. Open questions
+## 12. Decided questions
 
-- **Fonts in production.** The prototype loads Bungee and Rubik from Google Fonts. Proposal: self-host the font files under `/admin/assets` so that the panel has no third-party requests.
-- **Manual check in a browser.** Not confirmed. Proposal: an optional manual walkthrough of the main flow before the pull request.
-- **Branches.** Not confirmed. Proposal: one branch `feature/admin-panel` with small atomic commits.
+- **Fonts in production.** Self-hosted. `build:fonts` copies the Bungee and Rubik files from `@fontsource` packages to `/admin/assets/fonts` (ADR 0011).
+- **Manual check in a browser.** Done on 2026-10-01 with Chrome DevTools. See `docs/reports/admin-panel-browser-evidence.md`.
+- **Branches.** One branch, `feature/admin-panel`, with small atomic commits.
