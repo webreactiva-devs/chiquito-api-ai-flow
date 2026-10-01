@@ -351,9 +351,19 @@ CREATE TABLE IF NOT EXISTS sessions (
   expires_at TEXT NOT NULL,
   FOREIGN KEY (admin_id) REFERENCES admins(id) ON DELETE CASCADE
 );
+
+CREATE INDEX IF NOT EXISTS idx_votes_joke_id_vote_type ON votes(joke_id, vote_type);
+CREATE INDEX IF NOT EXISTS idx_sessions_admin_id ON sessions(admin_id);
+CREATE INDEX IF NOT EXISTS idx_sessions_expires_at ON sessions(expires_at);
 ```
 
-The `jokes`, `votes` and `stats` tables do not change.
+The `jokes`, `votes` and `stats` tables do not change. The new indexes have these functions:
+
+| Index | Used by |
+| --- | --- |
+| `idx_votes_joke_id_vote_type` | The vote counts for each row of the joke list. Without it, each count does a full scan of `votes`. |
+| `idx_sessions_admin_id` | `admin:password` and `admin:delete`, which delete the sessions of one admin. |
+| `idx_sessions_expires_at` | The clean-up of expired sessions at each login. |
 
 ```mermaid
 erDiagram
