@@ -4,7 +4,7 @@
   "type": "module",
   "scripts": {
     "start": "tsx src/server.ts",
-    "dev": "npm run build:fonts && tailwindcss -i src/admin/styles/input.css -o public/admin/admin.css --watch & COOKIE_SECURE=false tsx watch src/server.ts",
+    "dev": "npm run build:fonts && tailwindcss -i src/admin/styles/input.css -o public/admin/admin.css --watch=always & COOKIE_SECURE=false tsx watch src/server.ts",
     "build": "npm run build:css && tsc",
     "db:init": "tsx src/db/init-main.ts",
     "test:types": "tsc --noEmit",
